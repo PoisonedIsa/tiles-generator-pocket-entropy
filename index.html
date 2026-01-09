@@ -36,6 +36,19 @@
             background-color: rgba(139, 92, 246, 0.1);
         }
 
+        /* Estilo para botones de herramientas activos */
+        .tool-btn.active {
+            background-color: #7c3aed; /* Violet 600 */
+            color: white;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+        }
+
+        .custom-scroll::-webkit-scrollbar { width: 8px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
         input[type="file"] { display: none; }
     </style>
 </head>
@@ -43,11 +56,47 @@
 
     <!-- Header -->
     <header class="bg-slate-800 border-b border-slate-600 p-4 shadow-lg sticky top-0 z-50">
-        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <h1 class="text-2xl font-bold text-violet-300 tracking-wider">POCKET ENTROPY <span class="text-slate-400 text-sm font-sans ml-2 font-normal">Architect v2.6</span></h1>
-            <div class="flex gap-2">
-                <button onclick="toggleGrid()" id="gridBtn" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-sm transition border border-slate-500">Ocultar Grid</button>
-                <button onclick="resetGrid()" class="px-4 py-2 bg-red-900/80 hover:bg-red-800 text-white rounded text-sm transition border border-red-700">Borrar</button>
+        <div class="container mx-auto flex flex-col xl:flex-row justify-between items-center gap-4">
+            <h1 class="text-2xl font-bold text-violet-300 tracking-wider flex items-center gap-2">
+                POCKET ENTROPY <span class="text-slate-400 text-sm font-sans font-normal bg-slate-900 px-2 py-1 rounded">Architect v3.3</span>
+            </h1>
+            
+            <!-- Toolbar Global -->
+            <div class="flex flex-wrap justify-center gap-2 items-center">
+                
+                <!-- Selector de Herramientas (Modos) -->
+                <div class="flex bg-slate-900 p-1.5 rounded-lg border border-slate-700 shadow-inner">
+                    <button id="tool-paint" onclick="setToolMode('paint')" class="tool-btn active px-3 py-2 text-slate-400 hover:text-white rounded transition flex items-center gap-2" title="Pincel: Colocar y Rotar">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        <span class="text-xs font-bold hidden md:inline">Pincel</span>
+                    </button>
+                    
+                    <div class="w-px bg-slate-700 mx-1"></div>
+
+                    <button id="tool-mirror-x" onclick="setToolMode('mirror-x')" class="tool-btn px-3 py-2 text-slate-400 hover:text-white rounded transition flex items-center gap-2" title="Espejo H: Clic en una loseta para voltearla horizontalmente">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
+                        <span class="text-xs hidden md:inline">Esp. H</span>
+                    </button>
+                    
+                    <button id="tool-mirror-y" onclick="setToolMode('mirror-y')" class="tool-btn px-3 py-2 text-slate-400 hover:text-white rounded transition flex items-center gap-2" title="Espejo V: Clic en una loseta para voltearla verticalmente">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+                        <span class="text-xs hidden md:inline">Esp. V</span>
+                    </button>
+
+                    <div class="w-px bg-slate-700 mx-1"></div>
+
+                    <button id="tool-eraser" onclick="setToolMode('eraser')" class="tool-btn px-3 py-2 text-red-400 hover:text-red-200 hover:bg-red-900/30 rounded transition flex items-center gap-2" title="Goma: Borrar casilla individual">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                </div>
+
+                <!-- Acciones Globales -->
+                <button onclick="toggleGrid()" id="gridBtn" class="ml-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-sm transition border border-slate-500">Ocultar Grid</button>
+                
+                <button onclick="resetGrid()" class="px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded text-sm transition border border-red-600 font-bold shadow-md">
+                    Borrar Todo
+                </button>
+                
                 <button onclick="downloadTile()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded font-bold transition shadow-lg flex items-center gap-2 border border-emerald-500">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                     Exportar
@@ -60,10 +109,10 @@
     <div class="flex-1 container mx-auto p-6 flex flex-col lg:flex-row gap-8 items-start">
         
         <!-- Left Panel: Assets Palette -->
-        <div class="w-full lg:w-1/3 bg-slate-800/90 p-5 rounded-xl border border-slate-600 shadow-xl overflow-y-auto max-h-[85vh] sticky top-24 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
+        <div class="w-full lg:w-1/3 bg-slate-800/90 p-5 rounded-xl border border-slate-600 shadow-xl overflow-y-auto max-h-[85vh] sticky top-24 custom-scroll">
             <h2 class="text-lg mb-4 text-slate-200 border-b border-slate-600 pb-2 font-bold flex justify-between items-center">
                 <span>1. Banco de Assets</span>
-                <span class="text-xs font-normal text-slate-400 bg-slate-900 px-2 py-1 rounded">Clic para usar / Icono para subir</span>
+                <span class="text-[10px] text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded border border-emerald-800/50">Multi-upload activo</span>
             </h2>
             <div id="palette-container" class="space-y-5">
                 <!-- Se genera dinámicamente con JS -->
@@ -75,8 +124,8 @@
             <div class="flex justify-between w-full max-w-xl mb-2 items-end">
                 <h2 class="text-xl text-slate-100 font-bold">2. Área de Diseño</h2>
                 <div class="text-right">
-                    <div id="activeToolDisplay" class="text-sm font-bold text-violet-400">Herramienta: Muro (Var 1)</div>
-                    <span class="text-xs text-slate-400">Clic: Pintar/Rotar • Grid: 6x6</span>
+                    <div id="activeToolDisplay" class="text-sm font-bold text-violet-400 uppercase tracking-wider">MODO: PINCEL</div>
+                    <span class="text-xs text-slate-400">Selecciona herramienta arriba</span>
                 </div>
             </div>
             
@@ -84,48 +133,48 @@
                 <canvas id="tileCanvas" width="2400" height="2400" class="bg-slate-800 rounded shadow-inner"></canvas>
             </div>
 
-            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-xl">
-                <div class="p-4 bg-slate-800/80 rounded border border-slate-600">
-                    <h3 class="text-xs font-bold text-violet-300 uppercase mb-2">Controles</h3>
-                    <ul class="text-xs text-slate-300 space-y-1">
-                        <li>• <strong>Clic Izq:</strong> Colocar asset seleccionado.</li>
-                        <li>• <strong>Clic (Repetido):</strong> Rotar asset existente.</li>
-                        <li>• <strong>Arrastrar:</strong> Pintar rápido.</li>
+            <div class="mt-6 p-4 bg-slate-800/80 rounded border border-slate-600 w-full max-w-xl">
+                 <h3 class="text-xs font-bold text-emerald-300 uppercase mb-2 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Cómo usar las herramientas
+                 </h3>
+                 <div class="grid grid-cols-2 gap-4 text-xs text-slate-300">
+                    <ul class="space-y-1">
+                        <li>🖌️ <strong>Pincel:</strong> Clic para poner asset, clic de nuevo para rotar.</li>
+                        <li>🧽 <strong>Goma:</strong> Clic en una casilla para borrarla.</li>
                     </ul>
-                </div>
-                <div class="p-4 bg-slate-800/80 rounded border border-slate-600">
-                     <h3 class="text-xs font-bold text-emerald-300 uppercase mb-2">Ayuda</h3>
-                     <p class="text-xs text-slate-300">
-                         Ahora puedes seleccionar un slot vacío para usar el color placeholder. Usa el icono de "subir" (esquina inferior derecha del slot) solo cuando tengas la imagen lista.
-                     </p>
-                </div>
+                    <ul class="space-y-1">
+                        <li>↔️ <strong>Espejo H:</strong> Selecciona y clic en una loseta para voltearla horizontalmente.</li>
+                        <li>↕️ <strong>Espejo V:</strong> Selecciona y clic en una loseta para voltearla verticalmente.</li>
+                    </ul>
+                 </div>
             </div>
         </div>
 
     </div>
 
     <script>
+        // --- CONFIGURACIÓN ---
+        const DEFAULT_VARIATION_COUNT = 5;
         const terrainTypes = [
-            { id: 'floor', name: 'Suelo (Base)', color: '#475569' },
-            { id: 'wall', name: 'Muro (Borde)', color: '#1e293b' },
-            { id: 'corner', name: 'Esquinas', color: '#8b5cf6' }, // NUEVO: Categoría Esquinas
-            { id: 'obstacle', name: 'Obstáculo', color: '#64748b' },
-            { id: 'enemy', name: 'Enemigo', color: '#ef4444' },
-            { id: 'boss', name: 'Jefe', color: '#991b1b' },
-            { id: 'chest', name: 'Tesoro', color: '#fbbf24' },
-            { id: 'bonfire', name: 'Decoración', color: '#f97316' },
-            { id: 'exit', name: 'Puerta', color: '#cbd5e1' }
+            { id: 'floor', name: 'Suelo (Base)', color: '#475569', count: 5 },
+            { id: 'wall', name: 'Muro (Borde)', color: '#1e293b', count: 5 },
+            { id: 'corner', name: 'Esquinas', color: '#8b5cf6', count: 5 },
+            { id: 'obstacle', name: 'Obstáculo', color: '#64748b', count: 5 },
+            { id: 'treasure_room', name: 'Sala del Tesoro', color: '#f59e0b', count: 12 },
+            { id: 'chest', name: 'Cofre Tesoro', color: '#fbbf24', count: 5 },
+            { id: 'enemy', name: 'Enemigo', color: '#ef4444', count: 5 },
+            { id: 'boss', name: 'Jefe', color: '#991b1b', count: 5 },
+            { id: 'bonfire', name: 'Decoración', color: '#f97316', count: 5 },
+            { id: 'exit', name: 'Puerta', color: '#cbd5e1', count: 5 }
         ];
 
-        const VARIATION_COUNT = 5;
+        // Estado
+        let toolMode = 'paint'; // 'paint', 'mirror-x', 'mirror-y', 'eraser'
         let activeBrush = { id: 'wall', varIndex: 0 };
-        let grid = Array(6).fill().map(() => Array(6).fill(null).map(() => ({ type: 'floor', rotation: 0, varIndex: 0 })));
+        let grid = [];
         let images = {}; 
         let showGrid = true;
-        
-        // Inicializar banco de imágenes
-        terrainTypes.forEach(t => { images[t.id] = new Array(VARIATION_COUNT).fill(null); });
-
         let isDrawing = false;
         let hoverX = -1;
         let hoverY = -1;
@@ -134,10 +183,26 @@
         const ctx = canvas.getContext('2d');
         const CELL_SIZE = 400; 
 
+        // Inicializar Grid
+        function initializeGridData() {
+            grid = [];
+            for(let y=0; y<6; y++) {
+                let row = [];
+                for(let x=0; x<6; x++) row.push({ type: 'floor', rotation: 0, varIndex: 0, scaleX: 1, scaleY: 1 });
+                grid.push(row);
+            }
+        }
+
+        // --- INICIALIZACIÓN ---
         function init() {
+            initializeGridData();
+            
+            terrainTypes.forEach(t => { 
+                images[t.id] = new Array(t.count || DEFAULT_VARIATION_COUNT).fill(null); 
+            });
+
             createPalette();
             drawGrid();
-            updateActiveToolDisplay();
             
             canvas.addEventListener('mousedown', startDrawing);
             canvas.addEventListener('mousemove', handleMouseMove);
@@ -148,45 +213,72 @@
             canvas.addEventListener('touchmove', (e) => { e.preventDefault(); handleMouseMove(e.touches[0]); });
         }
 
+        // --- GESTIÓN DE HERRAMIENTAS ---
+        window.setToolMode = function(mode) {
+            toolMode = mode;
+            
+            // Actualizar UI
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            const btnId = mode === 'mirror-x' ? 'tool-mirror-x' : 
+                          mode === 'mirror-y' ? 'tool-mirror-y' : 
+                          mode === 'eraser' ? 'tool-eraser' : 'tool-paint';
+            document.getElementById(btnId).classList.add('active');
+
+            // Actualizar texto
+            const display = document.getElementById('activeToolDisplay');
+            const modeText = mode === 'paint' ? 'PINCEL' : mode === 'eraser' ? 'GOMA DE BORRAR' : mode === 'mirror-x' ? 'ESPEJO HORIZONTAL' : 'ESPEJO VERTICAL';
+            display.innerText = `MODO: ${modeText}`;
+            display.className = `text-sm font-bold uppercase tracking-wider ${mode === 'eraser' ? 'text-red-400' : 'text-violet-400'}`;
+        }
+
+        window.setBrush = function(id, varIndex) {
+            activeBrush = { id, varIndex };
+            setToolMode('paint'); // Al seleccionar un asset, volvemos a modo pincel automáticamente
+            createPalette(); 
+        }
+
+        // --- PALETA Y CARGA DE IMÁGENES ---
         function createPalette() {
             const container = document.getElementById('palette-container');
             container.innerHTML = ''; 
 
             terrainTypes.forEach(type => {
+                const varCount = type.count || DEFAULT_VARIATION_COUNT;
                 const row = document.createElement('div');
                 row.className = `p-3 rounded-lg border border-slate-700 bg-slate-900/50 hover:bg-slate-800 transition`;
                 
                 const title = document.createElement('div');
-                title.className = "flex items-center gap-2 mb-2";
-                title.innerHTML = `<div class="w-2 h-2 rounded-full shadow-[0_0_5px_currentColor]" style="background-color: ${type.color}; color: ${type.color}"></div><span class="text-xs font-bold text-slate-300 uppercase tracking-widest">${type.name}</span>`;
+                title.className = "flex items-center justify-between mb-2";
+                title.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full shadow-[0_0_5px_currentColor]" style="background-color: ${type.color}; color: ${type.color}"></div>
+                        <span class="text-xs font-bold text-slate-300 uppercase tracking-widest">${type.name}</span>
+                    </div>
+                    <span class="text-[10px] text-slate-500 font-mono">x${varCount}</span>
+                `;
                 row.appendChild(title);
 
                 const slotsContainer = document.createElement('div');
-                slotsContainer.className = "grid grid-cols-5 gap-1";
+                slotsContainer.className = "flex flex-wrap gap-1";
 
-                for (let i = 0; i < VARIATION_COUNT; i++) {
+                for (let i = 0; i < varCount; i++) {
                     const isActive = activeBrush.id === type.id && activeBrush.varIndex === i;
-                    
-                    // Slot Container
                     const slot = document.createElement('div');
-                    // Clases: 'group' para hover effects en el botón de upload
-                    slot.className = `var-slot relative aspect-square bg-slate-950 rounded border cursor-pointer transition-all group overflow-hidden ${isActive ? 'active border-violet-500 ring-1 ring-violet-500 z-10' : 'border-slate-700 hover:border-slate-500 opacity-90 hover:opacity-100'}`;
+                    slot.className = `var-slot relative w-[18%] aspect-square bg-slate-950 rounded border cursor-pointer transition-all group overflow-hidden ${isActive ? 'active border-violet-500 ring-1 ring-violet-500 z-10' : 'border-slate-700 hover:border-slate-500 opacity-90 hover:opacity-100'}`;
                     
-                    // ACCIÓN 1: Seleccionar pincel (Clic en el slot general)
                     slot.onclick = () => setBrush(type.id, i);
 
                     const previewId = `preview-${type.id}-${i}`;
                     
                     slot.innerHTML = `
-                        <!-- Preview Area (Imagen o Número) -->
                         <div id="${previewId}" class="w-full h-full flex items-center justify-center pointer-events-none">
                             <span class="text-slate-600 font-mono text-[10px] font-bold">${i + 1}</span>
                         </div>
-                        
-                        <!-- ACCIÓN 2: Botón de Subir (Esquina inferior derecha, pequeño) -->
-                        <label class="absolute bottom-0.5 right-0.5 w-6 h-6 bg-slate-900/90 hover:bg-violet-600 text-slate-400 hover:text-white rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer z-20 shadow-sm border border-slate-700" title="Subir Imagen" onclick="event.stopPropagation()">
-                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0l-4 4m4-4v12" /></svg>
-                             <input type="file" accept="image/*" onchange="uploadImage('${type.id}', ${i}, this)" class="hidden">
+                        <label class="absolute bottom-0 right-0 w-1/2 h-1/2 flex items-end justify-end p-1 opacity-0 group-hover:opacity-100 transition-all cursor-pointer z-20" title="Subir Imagen(es)" onclick="event.stopPropagation()">
+                             <div class="bg-slate-900/90 hover:bg-violet-600 text-slate-400 hover:text-white rounded-tl shadow-sm border-t border-l border-slate-700 w-full h-full flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0l-4 4m4-4v12" /></svg>
+                             </div>
+                             <input type="file" accept="image/*" multiple onchange="uploadImages('${type.id}', ${i}, this)" class="hidden">
                         </label>
                     `;
                     slotsContainer.appendChild(slot);
@@ -197,41 +289,39 @@
             updatePreviews();
         }
 
-        window.setBrush = function(id, varIndex) {
-            activeBrush = { id, varIndex };
-            createPalette(); // Re-render para actualizar borde activo
-            updateActiveToolDisplay();
-        }
+        window.uploadImages = function(id, startIndex, input) {
+            if (input.files && input.files.length > 0) {
+                const files = Array.from(input.files);
+                const typeObj = terrainTypes.find(t => t.id === id);
+                const maxCount = typeObj.count || DEFAULT_VARIATION_COUNT;
+                let filesProcessed = 0;
+                files.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
 
-        function updateActiveToolDisplay() {
-            const typeObj = terrainTypes.find(t => t.id === activeBrush.id);
-            const display = document.getElementById('activeToolDisplay');
-            if(display && typeObj) {
-                display.innerText = `Herramienta: ${typeObj.name} (Var ${activeBrush.varIndex + 1})`;
-                display.style.color = typeObj.color;
-            }
-        }
-
-        window.uploadImage = function(id, varIndex, input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        images[id][varIndex] = img;
-                        // Al subir, seleccionamos automáticamente esa variación
-                        setBrush(id, varIndex);
-                        drawGrid();
-                        updatePreviews(); // Actualizar miniatura
+                files.forEach((file, index) => {
+                    const targetIndex = startIndex + index;
+                    if (targetIndex < maxCount) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const img = new Image();
+                            img.onload = function() {
+                                images[id][targetIndex] = img;
+                                filesProcessed++;
+                                if (filesProcessed === files.length || targetIndex === maxCount - 1) {
+                                    setBrush(id, startIndex);
+                                    drawGrid();
+                                    updatePreviews();
+                                }
+                            }
+                            img.src = e.target.result;
+                        }
+                        reader.readAsDataURL(file);
                     }
-                    img.src = e.target.result;
-                }
-                reader.readAsDataURL(input.files[0]);
+                });
             }
-            // Reset input para permitir subir la misma imagen si se borra y se quiere poner de nuevo (opcional)
             input.value = '';
         }
 
+        // --- LÓGICA DE INTERACCIÓN PRINCIPAL ---
         function getCoords(e) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
@@ -255,18 +345,41 @@
             if (x >= 0 && x < 6 && y >= 0 && y < 6) {
                 const cell = grid[y][x];
                 
-                // Lógica de Pintado vs Rotación
-                // Si hacemos CLIC en una celda que YA tiene el mismo tipo y variación -> ROTAMOS
-                if (isClick && cell.type === activeBrush.id && cell.varIndex === activeBrush.varIndex) {
-                    cell.rotation = (cell.rotation + 90) % 360;
-                } 
-                // Si pintamos (arrastrando o clic en diferente) -> CAMBIAMOS TIPO
-                else if (cell.type !== activeBrush.id || cell.varIndex !== activeBrush.varIndex || !isClick) {
-                    // Solo actualizamos si es diferente para evitar resetear rotación al arrastrar sobre la misma celda
-                    if (cell.type !== activeBrush.id || cell.varIndex !== activeBrush.varIndex) {
-                        grid[y][x] = { type: activeBrush.id, rotation: 0, varIndex: activeBrush.varIndex };
+                // MODO 1: PINCEL (Colocar y Rotar)
+                if (toolMode === 'paint') {
+                    // Si hacemos clic en la misma loseta -> Rotar
+                    if (isClick && cell.type === activeBrush.id && cell.varIndex === activeBrush.varIndex) {
+                        cell.rotation = (cell.rotation + 90) % 360;
+                    } 
+                    // Si pintamos algo nuevo
+                    else if (cell.type !== activeBrush.id || cell.varIndex !== activeBrush.varIndex || !isClick) {
+                        if (cell.type !== activeBrush.id || cell.varIndex !== activeBrush.varIndex) {
+                            grid[y][x] = { 
+                                type: activeBrush.id, 
+                                rotation: 0, 
+                                varIndex: activeBrush.varIndex, 
+                                scaleX: 1, 
+                                scaleY: 1 
+                            };
+                        }
                     }
                 }
+                
+                // MODO 2: ESPEJO HORIZONTAL
+                else if (toolMode === 'mirror-x' && isClick) {
+                    cell.scaleX = cell.scaleX === 1 ? -1 : 1;
+                }
+                
+                // MODO 3: ESPEJO VERTICAL
+                else if (toolMode === 'mirror-y' && isClick) {
+                    cell.scaleY = cell.scaleY === 1 ? -1 : 1;
+                }
+                
+                // MODO 4: GOMA (Eraser)
+                else if (toolMode === 'eraser') {
+                    grid[y][x] = { type: 'floor', rotation: 0, varIndex: 0, scaleX: 1, scaleY: 1 };
+                }
+
                 drawGrid();
             }
         }
@@ -277,8 +390,15 @@
             drawGrid();
         }
 
+        // --- FUNCIÓN BORRAR REPARADA ---
+        window.resetGrid = function() {
+            if(confirm('🗑️ ¿Borrar toda la loseta?')) {
+                initializeGridData(); // Reinicia la estructura de datos
+                drawGrid();           // Fuerza el redibujado
+            }
+        }
+
         function drawGrid(withHighlight = true) {
-            // Fondo
             ctx.fillStyle = "#334155"; 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -287,8 +407,6 @@
                 for (let x = 0; x < 6; x++) {
                     const posX = x * CELL_SIZE;
                     const posY = y * CELL_SIZE;
-                    
-                    // Siempre dibujamos suelo base debajo de todo para evitar huecos en transparencias
                     const baseImg = images['floor'][0]; 
                     if (baseImg) {
                         ctx.drawImage(baseImg, posX, posY, CELL_SIZE, CELL_SIZE);
@@ -299,15 +417,12 @@
                 }
             }
 
-            // 2. Capa Objetos (Encima del suelo base)
+            // 2. Capa Objetos
             for (let y = 0; y < 6; y++) {
                 for (let x = 0; x < 6; x++) {
                     const cell = grid[y][x];
                     
-                    // Si la celda es 'floor' y varIndex es 0, ya la dibujamos en el paso 1, pero 
-                    // si tiene rotación o es otra variación, la dibujamos encima.
-                    // Optimización: Si es floor var 0 rot 0, saltar (ya está pintado).
-                    if (cell.type === 'floor' && cell.varIndex === 0 && cell.rotation === 0) continue;
+                    if (cell.type === 'floor' && cell.varIndex === 0 && cell.rotation === 0 && cell.scaleX === 1 && cell.scaleY === 1) continue;
 
                     const posX = x * CELL_SIZE;
                     const posY = y * CELL_SIZE;
@@ -317,6 +432,8 @@
                     ctx.save();
                     ctx.translate(centerX, centerY);
                     ctx.rotate(cell.rotation * Math.PI / 180);
+                    ctx.scale(cell.scaleX, cell.scaleY); 
+                    
                     const drawX = -CELL_SIZE / 2;
                     const drawY = -CELL_SIZE / 2;
 
@@ -324,10 +441,7 @@
                     if (img) {
                         ctx.drawImage(img, drawX, drawY, CELL_SIZE, CELL_SIZE);
                     } else {
-                        // Placeholder visual
                         const typeObj = terrainTypes.find(t => t.id === cell.type);
-                        
-                        // Si es suelo (no imagen), llenar todo. Si es objeto, un cuadrado más pequeño
                         if (cell.type === 'floor') {
                              ctx.fillStyle = typeObj.color;
                              ctx.fillRect(drawX, drawY, CELL_SIZE, CELL_SIZE);
@@ -335,15 +449,17 @@
                              ctx.fillStyle = typeObj.color;
                              ctx.fillRect(drawX+20, drawY+20, CELL_SIZE-40, CELL_SIZE-40);
                         }
-
-                        // Texto identificativo
                         ctx.fillStyle = "rgba(255,255,255,0.9)";
                         ctx.font = "bold 60px Arial";
                         ctx.textAlign = "center";
                         ctx.textBaseline = "middle";
-                        ctx.fillText(`${typeObj.name.substring(0,2).toUpperCase()}${cell.varIndex+1}`, 0, 0);
                         
-                        // Indicador de rotación (punto amarillo)
+                        ctx.save();
+                        ctx.scale(cell.scaleX, cell.scaleY); // Corrección texto espejado
+                        const shortName = typeObj.name.substring(0,2).toUpperCase();
+                        ctx.fillText(`${shortName}${cell.varIndex+1}`, 0, 0);
+                        ctx.restore();
+
                         if (cell.rotation !== 0) {
                             ctx.fillStyle = "#fbbf24";
                             ctx.beginPath();
@@ -355,16 +471,19 @@
                 }
             }
 
-            // 3. Highlight del cursor
+            // 3. Highlight
             if (withHighlight && hoverX >= 0 && hoverX < 6 && hoverY >= 0 && hoverY < 6) {
                 const hX = hoverX * CELL_SIZE;
                 const hY = hoverY * CELL_SIZE;
                 ctx.save();
-                ctx.strokeStyle = "rgba(167, 139, 250, 0.9)";
+                
+                // Color del borde según herramienta
+                if (toolMode === 'eraser') ctx.strokeStyle = "rgba(239, 68, 68, 0.9)"; // Rojo
+                else if (toolMode.startsWith('mirror')) ctx.strokeStyle = "rgba(16, 185, 129, 0.9)"; // Verde
+                else ctx.strokeStyle = "rgba(167, 139, 250, 0.9)"; // Violeta
+
                 ctx.lineWidth = 6;
                 ctx.strokeRect(hX+3, hY+3, CELL_SIZE-6, CELL_SIZE-6);
-                ctx.fillStyle = "rgba(139, 92, 246, 0.15)";
-                ctx.fillRect(hX, hY, CELL_SIZE, CELL_SIZE);
                 ctx.restore();
             }
 
@@ -387,12 +506,12 @@
 
         function updatePreviews() {
             terrainTypes.forEach(type => {
-                for (let i = 0; i < VARIATION_COUNT; i++) {
+                const varCount = type.count || DEFAULT_VARIATION_COUNT;
+                for (let i = 0; i < varCount; i++) {
                     const img = images[type.id][i];
                     const previewDiv = document.getElementById(`preview-${type.id}-${i}`);
-                    // Si tenemos div y tenemos imagen, renderizar miniatura
                     if (previewDiv && img) {
-                        previewDiv.innerHTML = ''; // Quitar número
+                        previewDiv.innerHTML = ''; 
                         const thumb = document.createElement('img');
                         thumb.src = img.src;
                         thumb.className = "w-full h-full object-cover rounded-sm";
@@ -402,23 +521,14 @@
             });
         }
 
-        window.resetGrid = function() {
-            if(confirm('¿Borrar todo el diseño?')) {
-                grid = Array(6).fill().map(() => Array(6).fill(null).map(() => ({ type: 'floor', rotation: 0, varIndex: 0 })));
-                drawGrid();
-            }
-        }
-
         window.downloadTile = function() {
             const prevHoverX = hoverX; hoverX = -1;
-            const prevShowGrid = showGrid; showGrid = false; // Exportar limpio
+            const prevShowGrid = showGrid; showGrid = false; 
             drawGrid();
-            
             const link = document.createElement('a');
             link.download = `pocket-entropy-map-${Date.now()}.png`;
             link.href = canvas.toDataURL('image/png', 1.0);
             link.click();
-            
             hoverX = prevHoverX;
             showGrid = prevShowGrid;
             drawGrid();
