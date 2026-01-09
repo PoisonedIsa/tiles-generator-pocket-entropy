@@ -20,7 +20,8 @@
 
         canvas {
             image-rendering: pixelated; 
-            cursor: crosshair; 
+            /* CAMBIO: Usamos 'cell' o 'pointer' para que el cursor tenga borde blanco y se vea sobre lo oscuro */
+            cursor: cell; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             width: 100%;
             max-width: 600px;
@@ -36,9 +37,8 @@
             background-color: rgba(139, 92, 246, 0.1);
         }
 
-        /* Estilo para botones de herramientas activos */
         .tool-btn.active {
-            background-color: #7c3aed; /* Violet 600 */
+            background-color: #7c3aed; 
             color: white;
             border-color: #8b5cf6;
             box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
@@ -58,42 +58,50 @@
     <header class="bg-slate-800 border-b border-slate-600 p-4 shadow-lg sticky top-0 z-50">
         <div class="container mx-auto flex flex-col xl:flex-row justify-between items-center gap-4">
             <h1 class="text-2xl font-bold text-violet-300 tracking-wider flex items-center gap-2">
-                POCKET ENTROPY <span class="text-slate-400 text-sm font-sans font-normal bg-slate-900 px-2 py-1 rounded">Architect v3.3</span>
+                POCKET ENTROPY <span class="text-slate-400 text-sm font-sans font-normal bg-slate-900 px-2 py-1 rounded">Architect v3.7</span>
             </h1>
             
             <!-- Toolbar Global -->
-            <div class="flex flex-wrap justify-center gap-2 items-center">
+            <div class="flex flex-wrap justify-center gap-3 items-center">
                 
-                <!-- Selector de Herramientas (Modos) -->
-                <div class="flex bg-slate-900 p-1.5 rounded-lg border border-slate-700 shadow-inner">
-                    <button id="tool-paint" onclick="setToolMode('paint')" class="tool-btn active px-3 py-2 text-slate-400 hover:text-white rounded transition flex items-center gap-2" title="Pincel: Colocar y Rotar">
+                <!-- Grupo 1: Herramientas de Edición -->
+                <div class="flex bg-slate-900 p-1 rounded-lg border border-slate-700 shadow-inner items-center">
+                    <button id="tool-paint" onclick="setToolMode('paint')" class="tool-btn active p-2 text-slate-400 hover:text-white rounded transition" title="Pincel">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                        <span class="text-xs font-bold hidden md:inline">Pincel</span>
                     </button>
-                    
-                    <div class="w-px bg-slate-700 mx-1"></div>
-
-                    <button id="tool-mirror-x" onclick="setToolMode('mirror-x')" class="tool-btn px-3 py-2 text-slate-400 hover:text-white rounded transition flex items-center gap-2" title="Espejo H: Clic en una loseta para voltearla horizontalmente">
+                    <div class="w-px h-5 bg-slate-700 mx-1"></div>
+                    <button id="tool-mirror-x" onclick="setToolMode('mirror-x')" class="tool-btn p-2 text-slate-400 hover:text-white rounded transition" title="Espejo Horizontal">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
-                        <span class="text-xs hidden md:inline">Esp. H</span>
                     </button>
-                    
-                    <button id="tool-mirror-y" onclick="setToolMode('mirror-y')" class="tool-btn px-3 py-2 text-slate-400 hover:text-white rounded transition flex items-center gap-2" title="Espejo V: Clic en una loseta para voltearla verticalmente">
+                    <button id="tool-mirror-y" onclick="setToolMode('mirror-y')" class="tool-btn p-2 text-slate-400 hover:text-white rounded transition" title="Espejo Vertical">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
-                        <span class="text-xs hidden md:inline">Esp. V</span>
                     </button>
-
-                    <div class="w-px bg-slate-700 mx-1"></div>
-
-                    <button id="tool-eraser" onclick="setToolMode('eraser')" class="tool-btn px-3 py-2 text-red-400 hover:text-red-200 hover:bg-red-900/30 rounded transition flex items-center gap-2" title="Goma: Borrar casilla individual">
+                    <div class="w-px h-5 bg-slate-700 mx-1"></div>
+                    <button id="tool-eraser" onclick="setToolMode('eraser')" class="tool-btn p-2 text-red-400 hover:text-red-200 hover:bg-red-900/30 rounded transition" title="Goma de Borrar">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     </button>
                 </div>
 
-                <!-- Acciones Globales -->
-                <button onclick="toggleGrid()" id="gridBtn" class="ml-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-sm transition border border-slate-500">Ocultar Grid</button>
+                <!-- Grupo 2: Control de Rejilla -->
+                <div class="flex bg-slate-900 p-1.5 rounded-lg border border-slate-700 shadow-inner items-center gap-2">
+                    <span class="text-[10px] text-slate-500 font-bold uppercase ml-1">Grid</span>
+                    
+                    <div class="flex bg-slate-800 rounded p-0.5 border border-slate-700">
+                        <button onclick="setGridColor('rgba(255, 255, 255, 0.8)')" class="w-5 h-5 rounded-full bg-white border border-slate-400 hover:scale-110 transition shadow-sm" title="Rejilla Blanca"></button>
+                        <button onclick="setGridColor('rgba(148, 163, 184, 0.8)')" class="w-5 h-5 rounded-full bg-slate-400 border border-slate-500 hover:scale-110 transition shadow-sm ml-1" title="Rejilla Gris"></button>
+                        <button onclick="setGridColor('rgba(0, 0, 0, 0.8)')" class="w-5 h-5 rounded-full bg-black border border-slate-600 hover:scale-110 transition shadow-sm ml-1" title="Rejilla Negra"></button>
+                    </div>
+
+                    <button onclick="toggleGrid()" id="gridBtn" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-xs transition border border-slate-500 font-medium">
+                        Ocultar
+                    </button>
+                </div>
                 
-                <button onclick="resetGrid()" class="px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded text-sm transition border border-red-600 font-bold shadow-md">
+                <div class="w-px h-8 bg-slate-600 mx-1 hidden md:block"></div>
+
+                <!-- Grupo 3: Acciones -->
+                <button onclick="resetGrid()" class="px-4 py-2 bg-red-900/80 hover:bg-red-800 text-white rounded text-sm transition border border-red-700 font-bold shadow-md flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     Borrar Todo
                 </button>
                 
@@ -125,7 +133,7 @@
                 <h2 class="text-xl text-slate-100 font-bold">2. Área de Diseño</h2>
                 <div class="text-right">
                     <div id="activeToolDisplay" class="text-sm font-bold text-violet-400 uppercase tracking-wider">MODO: PINCEL</div>
-                    <span class="text-xs text-slate-400">Selecciona herramienta arriba</span>
+                    <span class="text-xs text-slate-400">Clic: Pintar/Rotar • Grid: 6x6</span>
                 </div>
             </div>
             
@@ -134,18 +142,22 @@
             </div>
 
             <div class="mt-6 p-4 bg-slate-800/80 rounded border border-slate-600 w-full max-w-xl">
-                 <h3 class="text-xs font-bold text-emerald-300 uppercase mb-2 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    Cómo usar las herramientas
-                 </h3>
+                 <div class="flex justify-between items-start mb-2">
+                     <h3 class="text-xs font-bold text-emerald-300 uppercase flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Guía Rápida
+                     </h3>
+                     <span class="text-[10px] text-slate-500">v3.7</span>
+                 </div>
                  <div class="grid grid-cols-2 gap-4 text-xs text-slate-300">
                     <ul class="space-y-1">
-                        <li>🖌️ <strong>Pincel:</strong> Clic para poner asset, clic de nuevo para rotar.</li>
-                        <li>🧽 <strong>Goma:</strong> Clic en una casilla para borrarla.</li>
+                        <li>🖌️ <strong>Pincel:</strong> Clic coloca. Clic de nuevo rota.</li>
+                        <li>🧽 <strong>Goma:</strong> Borra una casilla.</li>
+                        <li>🏁 <strong>Rejilla:</strong> Cambia el color arriba. Se exporta si es visible.</li>
                     </ul>
                     <ul class="space-y-1">
-                        <li>↔️ <strong>Espejo H:</strong> Selecciona y clic en una loseta para voltearla horizontalmente.</li>
-                        <li>↕️ <strong>Espejo V:</strong> Selecciona y clic en una loseta para voltearla verticalmente.</li>
+                        <li>↔️ <strong>Espejo H/V:</strong> Voltea losetas ya colocadas.</li>
+                        <li>📁 <strong>Subir:</strong> Usa el icono pequeño en cada cuadro.</li>
                     </ul>
                  </div>
             </div>
@@ -170,11 +182,12 @@
         ];
 
         // Estado
-        let toolMode = 'paint'; // 'paint', 'mirror-x', 'mirror-y', 'eraser'
+        let toolMode = 'paint'; 
         let activeBrush = { id: 'wall', varIndex: 0 };
         let grid = [];
         let images = {}; 
         let showGrid = true;
+        let gridColor = 'rgba(0, 0, 0, 0.8)'; 
         let isDrawing = false;
         let hoverX = -1;
         let hoverY = -1;
@@ -213,27 +226,38 @@
             canvas.addEventListener('touchmove', (e) => { e.preventDefault(); handleMouseMove(e.touches[0]); });
         }
 
-        // --- GESTIÓN DE HERRAMIENTAS ---
+        // --- GESTIÓN DE HERRAMIENTAS Y GRID ---
         window.setToolMode = function(mode) {
             toolMode = mode;
-            
-            // Actualizar UI
             document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
             const btnId = mode === 'mirror-x' ? 'tool-mirror-x' : 
                           mode === 'mirror-y' ? 'tool-mirror-y' : 
                           mode === 'eraser' ? 'tool-eraser' : 'tool-paint';
-            document.getElementById(btnId).classList.add('active');
+            const btn = document.getElementById(btnId);
+            if (btn) btn.classList.add('active');
 
-            // Actualizar texto
             const display = document.getElementById('activeToolDisplay');
             const modeText = mode === 'paint' ? 'PINCEL' : mode === 'eraser' ? 'GOMA DE BORRAR' : mode === 'mirror-x' ? 'ESPEJO HORIZONTAL' : 'ESPEJO VERTICAL';
             display.innerText = `MODO: ${modeText}`;
             display.className = `text-sm font-bold uppercase tracking-wider ${mode === 'eraser' ? 'text-red-400' : 'text-violet-400'}`;
         }
 
+        window.setGridColor = function(color) {
+            gridColor = color;
+            showGrid = true;
+            document.getElementById('gridBtn').innerText = "Ocultar";
+            drawGrid();
+        }
+
+        window.toggleGrid = function() {
+            showGrid = !showGrid;
+            document.getElementById('gridBtn').innerText = showGrid ? "Ocultar" : "Mostrar";
+            drawGrid();
+        }
+
         window.setBrush = function(id, varIndex) {
             activeBrush = { id, varIndex };
-            setToolMode('paint'); // Al seleccionar un asset, volvemos a modo pincel automáticamente
+            setToolMode('paint'); 
             createPalette(); 
         }
 
@@ -321,7 +345,7 @@
             input.value = '';
         }
 
-        // --- LÓGICA DE INTERACCIÓN PRINCIPAL ---
+        // --- LÓGICA DE DIBUJO ---
         function getCoords(e) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
@@ -345,13 +369,10 @@
             if (x >= 0 && x < 6 && y >= 0 && y < 6) {
                 const cell = grid[y][x];
                 
-                // MODO 1: PINCEL (Colocar y Rotar)
                 if (toolMode === 'paint') {
-                    // Si hacemos clic en la misma loseta -> Rotar
                     if (isClick && cell.type === activeBrush.id && cell.varIndex === activeBrush.varIndex) {
                         cell.rotation = (cell.rotation + 90) % 360;
                     } 
-                    // Si pintamos algo nuevo
                     else if (cell.type !== activeBrush.id || cell.varIndex !== activeBrush.varIndex || !isClick) {
                         if (cell.type !== activeBrush.id || cell.varIndex !== activeBrush.varIndex) {
                             grid[y][x] = { 
@@ -364,18 +385,12 @@
                         }
                     }
                 }
-                
-                // MODO 2: ESPEJO HORIZONTAL
                 else if (toolMode === 'mirror-x' && isClick) {
                     cell.scaleX = cell.scaleX === 1 ? -1 : 1;
                 }
-                
-                // MODO 3: ESPEJO VERTICAL
                 else if (toolMode === 'mirror-y' && isClick) {
                     cell.scaleY = cell.scaleY === 1 ? -1 : 1;
                 }
-                
-                // MODO 4: GOMA (Eraser)
                 else if (toolMode === 'eraser') {
                     grid[y][x] = { type: 'floor', rotation: 0, varIndex: 0, scaleX: 1, scaleY: 1 };
                 }
@@ -384,25 +399,30 @@
             }
         }
 
-        window.toggleGrid = function() {
-            showGrid = !showGrid;
-            document.getElementById('gridBtn').innerText = showGrid ? "Ocultar Grid" : "Mostrar Grid";
-            drawGrid();
-        }
-
-        // --- FUNCIÓN BORRAR REPARADA ---
+        // --- FUNCIONES ACCIÓN ---
         window.resetGrid = function() {
             if(confirm('🗑️ ¿Borrar toda la loseta?')) {
-                initializeGridData(); // Reinicia la estructura de datos
-                drawGrid();           // Fuerza el redibujado
+                initializeGridData(); 
+                drawGrid();           
             }
+        }
+
+        window.downloadTile = function() {
+            const prevHoverX = hoverX; hoverX = -1;
+            drawGrid();
+            const link = document.createElement('a');
+            link.download = `pocket-entropy-map-${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+            hoverX = prevHoverX;
+            drawGrid();
         }
 
         function drawGrid(withHighlight = true) {
             ctx.fillStyle = "#334155"; 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // 1. Capa Base (Suelo)
+            // 1. Capa Base
             for (let y = 0; y < 6; y++) {
                 for (let x = 0; x < 6; x++) {
                     const posX = x * CELL_SIZE;
@@ -421,7 +441,6 @@
             for (let y = 0; y < 6; y++) {
                 for (let x = 0; x < 6; x++) {
                     const cell = grid[y][x];
-                    
                     if (cell.type === 'floor' && cell.varIndex === 0 && cell.rotation === 0 && cell.scaleX === 1 && cell.scaleY === 1) continue;
 
                     const posX = x * CELL_SIZE;
@@ -433,7 +452,6 @@
                     ctx.translate(centerX, centerY);
                     ctx.rotate(cell.rotation * Math.PI / 180);
                     ctx.scale(cell.scaleX, cell.scaleY); 
-                    
                     const drawX = -CELL_SIZE / 2;
                     const drawY = -CELL_SIZE / 2;
 
@@ -453,44 +471,20 @@
                         ctx.font = "bold 60px Arial";
                         ctx.textAlign = "center";
                         ctx.textBaseline = "middle";
-                        
                         ctx.save();
-                        ctx.scale(cell.scaleX, cell.scaleY); // Corrección texto espejado
+                        ctx.scale(cell.scaleX, cell.scaleY); 
                         const shortName = typeObj.name.substring(0,2).toUpperCase();
                         ctx.fillText(`${shortName}${cell.varIndex+1}`, 0, 0);
                         ctx.restore();
-
-                        if (cell.rotation !== 0) {
-                            ctx.fillStyle = "#fbbf24";
-                            ctx.beginPath();
-                            ctx.arc(CELL_SIZE/2 - 30, -CELL_SIZE/2 + 30, 15, 0, Math.PI*2);
-                            ctx.fill();
-                        }
                     }
                     ctx.restore();
                 }
             }
 
-            // 3. Highlight
-            if (withHighlight && hoverX >= 0 && hoverX < 6 && hoverY >= 0 && hoverY < 6) {
-                const hX = hoverX * CELL_SIZE;
-                const hY = hoverY * CELL_SIZE;
-                ctx.save();
-                
-                // Color del borde según herramienta
-                if (toolMode === 'eraser') ctx.strokeStyle = "rgba(239, 68, 68, 0.9)"; // Rojo
-                else if (toolMode.startsWith('mirror')) ctx.strokeStyle = "rgba(16, 185, 129, 0.9)"; // Verde
-                else ctx.strokeStyle = "rgba(167, 139, 250, 0.9)"; // Violeta
-
-                ctx.lineWidth = 6;
-                ctx.strokeRect(hX+3, hY+3, CELL_SIZE-6, CELL_SIZE-6);
-                ctx.restore();
-            }
-
-            // 4. Rejilla
+            // 3. Rejilla (GRID)
             if (showGrid) {
-                ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                ctx.lineWidth = 2; 
+                ctx.strokeStyle = gridColor; 
+                ctx.lineWidth = 20; // GRUESO: 20px
                 for (let i = 1; i < 6; i++) {
                     ctx.beginPath();
                     ctx.moveTo(i * CELL_SIZE, 0);
@@ -502,8 +496,35 @@
                     ctx.stroke();
                 }
             }
-        }
 
+            // 4. Highlight (Cursor) - AHORA CON RELLENO VISIBLE
+            if (withHighlight && hoverX >= 0 && hoverX < 6 && hoverY >= 0 && hoverY < 6) {
+                const hX = hoverX * CELL_SIZE;
+                const hY = hoverY * CELL_SIZE;
+                ctx.save();
+                
+                let baseColorRGB = "167, 139, 250"; // Violeta por defecto
+                if (toolMode === 'eraser') baseColorRGB = "239, 68, 68"; // Rojo
+                else if (toolMode.startsWith('mirror')) baseColorRGB = "16, 185, 129"; // Verde
+
+                // 1. RELLENO (Nuevo): Para que se vea dentro de la celda aunque el grid sea grueso
+                ctx.fillStyle = `rgba(${baseColorRGB}, 0.25)`;
+                ctx.fillRect(hX, hY, CELL_SIZE, CELL_SIZE);
+
+                // 2. BORDE EXTERIOR
+                ctx.strokeStyle = `rgba(${baseColorRGB}, 1)`;
+                ctx.lineWidth = 10;
+                ctx.strokeRect(hX + 5, hY + 5, CELL_SIZE - 10, CELL_SIZE - 10);
+
+                // 3. CONTRASTE (Nuevo): Borde fino blanco para resaltar sobre grid negro
+                ctx.strokeStyle = "rgba(255,255,255,0.6)";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(hX + 12, hY + 12, CELL_SIZE - 24, CELL_SIZE - 24);
+
+                ctx.restore();
+            }
+        }
+        
         function updatePreviews() {
             terrainTypes.forEach(type => {
                 const varCount = type.count || DEFAULT_VARIATION_COUNT;
@@ -519,19 +540,6 @@
                     }
                 }
             });
-        }
-
-        window.downloadTile = function() {
-            const prevHoverX = hoverX; hoverX = -1;
-            const prevShowGrid = showGrid; showGrid = false; 
-            drawGrid();
-            const link = document.createElement('a');
-            link.download = `pocket-entropy-map-${Date.now()}.png`;
-            link.href = canvas.toDataURL('image/png', 1.0);
-            link.click();
-            hoverX = prevHoverX;
-            showGrid = prevShowGrid;
-            drawGrid();
         }
 
         init();
