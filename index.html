@@ -10,8 +10,8 @@
         
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0f172a; /* Slate 900 */
-            color: #e2e8f0;
+            background-color: #334155; /* Slate 700 - Más suave que negro puro */
+            color: #f1f5f9;
         }
         
         h1, h2, h3 {
@@ -21,71 +21,80 @@
         canvas {
             image-rendering: pixelated; 
             cursor: pointer; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             width: 100%;
             max-width: 600px;
             height: auto;
             aspect-ratio: 1 / 1;
         }
 
-        /* Estilo para el slot seleccionado */
         .var-slot.active {
-            border-color: #a78bfa; /* Violet 400 */
+            border-color: #a78bfa; 
             box-shadow: 0 0 8px #8b5cf6;
             transform: scale(1.05);
+            z-index: 10;
         }
 
-        input[type="file"] {
-            display: none;
-        }
+        input[type="file"] { display: none; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
     <!-- Header -->
-    <header class="bg-slate-900 border-b border-slate-700 p-4 shadow-lg">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-violet-400">POCKET ENTROPY <span class="text-slate-400 text-sm font-sans ml-2">Tile Architect v2.0 (Variaciones)</span></h1>
+    <header class="bg-slate-800 border-b border-slate-600 p-4 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <h1 class="text-2xl font-bold text-violet-300 tracking-wider">POCKET ENTROPY <span class="text-slate-400 text-sm font-sans ml-2 font-normal">Architect v2.5</span></h1>
             <div class="flex gap-2">
-                <button onclick="resetGrid()" class="px-4 py-2 bg-red-900 hover:bg-red-700 text-white rounded text-sm transition">Borrar Grid</button>
-                <button onclick="downloadTile()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded font-bold transition shadow-lg flex items-center gap-2">
+                <button onclick="toggleGrid()" id="gridBtn" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-sm transition border border-slate-500">Ocultar Grid</button>
+                <button onclick="resetGrid()" class="px-4 py-2 bg-red-900/80 hover:bg-red-800 text-white rounded text-sm transition border border-red-700">Borrar</button>
+                <button onclick="downloadTile()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded font-bold transition shadow-lg flex items-center gap-2 border border-emerald-500">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                    Exportar PNG (HD)
+                    Exportar
                 </button>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <div class="flex-1 container mx-auto p-6 flex flex-col lg:flex-row gap-8">
+    <div class="flex-1 container mx-auto p-6 flex flex-col lg:flex-row gap-8 items-start">
         
         <!-- Left Panel: Assets Palette -->
-        <div class="w-full lg:w-1/3 bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-xl overflow-y-auto max-h-[85vh]">
-            <h2 class="text-xl mb-4 text-slate-200 border-b border-slate-600 pb-2">1. Cargar Assets</h2>
-            <p class="text-xs text-slate-400 mb-4">Cada tipo tiene 3 variaciones. Haz clic en el cuadro para <strong>seleccionar</strong> y en el icono de subida para <strong>cargar imagen</strong>.</p>
-
-            <div id="palette-container" class="space-y-4">
+        <div class="w-full lg:w-1/3 bg-slate-800/90 p-5 rounded-xl border border-slate-600 shadow-xl overflow-y-auto max-h-[85vh] sticky top-24">
+            <h2 class="text-lg mb-4 text-slate-200 border-b border-slate-600 pb-2 font-bold flex justify-between items-center">
+                <span>1. Banco de Assets</span>
+                <span class="text-xs font-normal text-slate-400 bg-slate-900 px-2 py-1 rounded">5 Variaciones/tipo</span>
+            </h2>
+            <div id="palette-container" class="space-y-5">
                 <!-- Se genera dinámicamente con JS -->
             </div>
         </div>
 
         <!-- Center Panel: Canvas & Drawing -->
         <div class="w-full lg:w-2/3 flex flex-col items-center">
-            <h2 class="text-xl mb-4 text-slate-200">2. Diseñar Loseta (6x6)</h2>
-            
-            <div class="relative group w-full flex justify-center">
-                <canvas id="tileCanvas" width="2400" height="2400" class="bg-slate-950 rounded border-2 border-slate-600"></canvas>
+            <div class="flex justify-between w-full max-w-xl mb-2 items-end">
+                <h2 class="text-xl text-slate-100 font-bold">2. Área de Diseño</h2>
+                <span class="text-xs text-slate-400">Clic: Pintar/Rotar • Grid: 6x6</span>
             </div>
-            <div class="mt-2 text-xs text-slate-500">Resolución de Salida: 2400x2400px</div>
+            
+            <div class="relative group w-full flex justify-center bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 shadow-2xl backdrop-blur-sm">
+                <canvas id="tileCanvas" width="2400" height="2400" class="bg-slate-800 rounded shadow-inner"></canvas>
+            </div>
 
-            <div class="mt-6 p-4 bg-slate-800 rounded border border-slate-700 w-full max-w-xl">
-                <h3 class="text-sm font-bold text-slate-400 mb-2">Instrucciones:</h3>
-                <ul class="text-xs text-slate-300 list-disc list-inside space-y-1">
-                    <li><strong>Seleccionar:</strong> Elige una de las 3 variaciones del menú izquierdo.</li>
-                    <li><strong>Pintar:</strong> Clic o arrastre en la cuadrícula.</li>
-                    <li><strong>Rotar:</strong> Clic sobre un elemento existente para girarlo 90°.</li>
-                    <li><strong>Variedad:</strong> Usa diferentes variaciones de suelo/muro para evitar patrones repetitivos.</li>
-                </ul>
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-xl">
+                <div class="p-4 bg-slate-800/80 rounded border border-slate-600">
+                    <h3 class="text-xs font-bold text-violet-300 uppercase mb-2">Controles</h3>
+                    <ul class="text-xs text-slate-300 space-y-1">
+                        <li>• <strong>Clic:</strong> Colocar asset seleccionado.</li>
+                        <li>• <strong>Clic (Repetido):</strong> Rotar 90°.</li>
+                        <li>• <strong>Arrastrar:</strong> Pintar múltiples celdas.</li>
+                    </ul>
+                </div>
+                <div class="p-4 bg-slate-800/80 rounded border border-slate-600">
+                     <h3 class="text-xs font-bold text-emerald-300 uppercase mb-2">Tips Visuales</h3>
+                     <p class="text-xs text-slate-300">
+                         Si el patrón marea, prueba a desactivar la rejilla o usar texturas más planas (Var 0) intercaladas con detalles (Var 1).
+                     </p>
+                </div>
             </div>
         </div>
 
@@ -93,31 +102,23 @@
 
     <script>
         const terrainTypes = [
-            { id: 'floor', name: 'Suelo (Base)', color: '#334155' },
-            { id: 'wall', name: 'Muro (#)', color: '#020617' },
-            { id: 'obstacle', name: 'Obstáculo (X)', color: '#475569' },
-            { id: 'enemy', name: 'Pentagrama (P)', color: '#ef4444' },
-            { id: 'boss', name: 'Jefe (J)', color: '#7f1d1d' },
-            { id: 'chest', name: 'Tesoro (C)', color: '#eab308' },
-            { id: 'bonfire', name: 'Hoguera (H)', color: '#f97316' },
-            { id: 'valve', name: 'Válvula (V)', color: '#0ea5e9' },
-            { id: 'exit', name: 'Salida/Puerta', color: '#94a3b8' }
+            { id: 'floor', name: 'Suelo (Base)', color: '#475569' },
+            { id: 'wall', name: 'Muro (Borde)', color: '#1e293b' },
+            { id: 'obstacle', name: 'Obstáculo', color: '#64748b' },
+            { id: 'enemy', name: 'Enemigo', color: '#ef4444' },
+            { id: 'boss', name: 'Jefe', color: '#991b1b' },
+            { id: 'chest', name: 'Tesoro', color: '#fbbf24' },
+            { id: 'bonfire', name: 'Decoración', color: '#f97316' },
+            { id: 'exit', name: 'Puerta', color: '#cbd5e1' }
         ];
 
-        // Estado Global
-        // activeBrush ahora guarda { id: string, varIndex: number }
+        const VARIATION_COUNT = 5;
         let activeBrush = { id: 'wall', varIndex: 0 };
-        
-        // grid guarda { type: string, rotation: number, varIndex: number }
         let grid = Array(6).fill().map(() => Array(6).fill(null).map(() => ({ type: 'floor', rotation: 0, varIndex: 0 })));
-        
-        // images ahora es un objeto donde cada key (id) tiene un array de 3 imagenes (o null)
         let images = {}; 
+        let showGrid = true;
         
-        // Inicializar estructura de imágenes
-        terrainTypes.forEach(t => {
-            images[t.id] = [null, null, null];
-        });
+        terrainTypes.forEach(t => { images[t.id] = new Array(VARIATION_COUNT).fill(null); });
 
         let isDrawing = false;
         let hoverX = -1;
@@ -136,52 +137,40 @@
             canvas.addEventListener('mouseup', stopDrawing);
             canvas.addEventListener('mouseleave', leaveCanvas);
             
-            canvas.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                startDrawing(e.touches[0]);
-            });
-            canvas.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                handleMouseMove(e.touches[0]);
-            });
+            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e.touches[0]); });
+            canvas.addEventListener('touchmove', (e) => { e.preventDefault(); handleMouseMove(e.touches[0]); });
         }
 
         function createPalette() {
             const container = document.getElementById('palette-container');
-            container.innerHTML = ''; // Limpiar por si acaso
+            container.innerHTML = ''; 
 
             terrainTypes.forEach(type => {
                 const row = document.createElement('div');
-                row.className = `p-3 rounded border border-slate-700 bg-slate-900 transition hover:bg-slate-800`;
+                row.className = `p-3 rounded-lg border border-slate-700 bg-slate-900/50 hover:bg-slate-800 transition`;
                 
-                // Título de la categoría
                 const title = document.createElement('div');
                 title.className = "flex items-center gap-2 mb-2";
-                title.innerHTML = `<div class="w-3 h-3 rounded-full" style="background-color: ${type.color}"></div><span class="text-sm font-bold text-slate-300 uppercase tracking-wide">${type.name}</span>`;
+                title.innerHTML = `<div class="w-2 h-2 rounded-full shadow-[0_0_5px_currentColor]" style="background-color: ${type.color}; color: ${type.color}"></div><span class="text-xs font-bold text-slate-300 uppercase tracking-widest">${type.name}</span>`;
                 row.appendChild(title);
 
-                // Contenedor de variaciones (3 slots)
                 const slotsContainer = document.createElement('div');
-                slotsContainer.className = "flex gap-2";
+                slotsContainer.className = "grid grid-cols-5 gap-1";
 
-                for (let i = 0; i < 3; i++) {
+                for (let i = 0; i < VARIATION_COUNT; i++) {
                     const isActive = activeBrush.id === type.id && activeBrush.varIndex === i;
-                    
                     const slot = document.createElement('div');
-                    slot.className = `var-slot relative flex-1 aspect-square bg-slate-950 rounded border-2 cursor-pointer transition group overflow-hidden ${isActive ? 'active border-violet-500' : 'border-slate-700 hover:border-slate-500'}`;
+                    slot.className = `relative aspect-square bg-slate-950 rounded border cursor-pointer transition-all group overflow-hidden ${isActive ? 'active border-violet-500 z-10 ring-1 ring-violet-500' : 'border-slate-700 hover:border-slate-500 opacity-80 hover:opacity-100'}`;
                     slot.onclick = () => setBrush(type.id, i);
 
-                    // Contenido del slot (Preview)
                     const previewId = `preview-${type.id}-${i}`;
                     slot.innerHTML = `
-                        <div id="${previewId}" class="w-full h-full flex items-center justify-center text-slate-700 font-mono text-xs">
+                        <div id="${previewId}" class="w-full h-full flex items-center justify-center text-slate-600 font-mono text-[10px] font-bold">
                             ${i + 1}
                         </div>
-                        
-                        <!-- Botón de subir (aparece en hover) -->
-                        <label class="absolute bottom-1 right-1 bg-slate-800 hover:bg-slate-600 text-white p-1.5 rounded shadow-lg opacity-0 group-hover:opacity-100 transition cursor-pointer z-10" title="Subir Imagen" onclick="event.stopPropagation()">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0l-4 4m4-4v12" /></svg>
-                            <input type="file" accept="image/*" onchange="uploadImage('${type.id}', ${i}, this)">
+                        <label class="absolute inset-0 bg-slate-900/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer z-20 backdrop-blur-[1px]" title="Subir Imagen" onclick="event.stopPropagation()">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                             <input type="file" accept="image/*" onchange="uploadImage('${type.id}', ${i}, this)" class="hidden">
                         </label>
                     `;
                     slotsContainer.appendChild(slot);
@@ -189,11 +178,12 @@
                 row.appendChild(slotsContainer);
                 container.appendChild(row);
             });
+            updatePreviews();
         }
 
         window.setBrush = function(id, varIndex) {
             activeBrush = { id, varIndex };
-            createPalette(); // Re-renderizar para actualizar clases 'active'
+            createPalette();
         }
 
         window.uploadImage = function(id, varIndex, input) {
@@ -202,13 +192,8 @@
                 reader.onload = function(e) {
                     const img = new Image();
                     img.onload = function() {
-                        // Guardar imagen en el array correspondiente
                         images[id][varIndex] = img;
-                        
-                        // Seleccionar automáticamente esta variación
                         setBrush(id, varIndex);
-                        
-                        // Actualizar grid para mostrar cambios
                         drawGrid();
                     }
                     img.src = e.target.result;
@@ -226,93 +211,60 @@
             return { x, y };
         }
 
-        function startDrawing(e) {
-            isDrawing = true;
-            paint(e, true);
-        }
-
+        function startDrawing(e) { isDrawing = true; paint(e, true); }
         function handleMouseMove(e) {
             const { x, y } = getCoords(e);
-            
-            if (x !== hoverX || y !== hoverY) {
-                hoverX = x;
-                hoverY = y;
-                drawGrid();
-            }
-
-            if (isDrawing) {
-                paint(e, false);
-            }
+            if (x !== hoverX || y !== hoverY) { hoverX = x; hoverY = y; drawGrid(); }
+            if (isDrawing) paint(e, false);
         }
-
-        function stopDrawing() {
-            isDrawing = false;
-        }
-
-        function leaveCanvas() {
-            isDrawing = false;
-            hoverX = -1;
-            hoverY = -1;
-            drawGrid(); 
-        }
+        function stopDrawing() { isDrawing = false; }
+        function leaveCanvas() { isDrawing = false; hoverX = -1; hoverY = -1; drawGrid(); }
 
         function paint(e, isClick) {
             const { x, y } = getCoords(e);
-            
             if (x >= 0 && x < 6 && y >= 0 && y < 6) {
                 const cell = grid[y][x];
-                
-                // Si es clic y es el mismo tipo Y misma variación -> Rotar
                 if (isClick && cell.type === activeBrush.id && cell.varIndex === activeBrush.varIndex) {
                     cell.rotation = (cell.rotation + 90) % 360;
-                } 
-                // Si pintamos (arrastre o clic en diferente)
-                else if (cell.type !== activeBrush.id || cell.varIndex !== activeBrush.varIndex || !isClick) {
-                    // Evitar resetear rotación si solo cambiamos de celda arrastrando con el mismo pincel
+                } else if (cell.type !== activeBrush.id || cell.varIndex !== activeBrush.varIndex || !isClick) {
                     if (cell.type !== activeBrush.id || cell.varIndex !== activeBrush.varIndex) {
-                        grid[y][x] = { 
-                            type: activeBrush.id, 
-                            rotation: 0, 
-                            varIndex: activeBrush.varIndex 
-                        };
+                        grid[y][x] = { type: activeBrush.id, rotation: 0, varIndex: activeBrush.varIndex };
                     }
                 }
                 drawGrid();
             }
         }
 
-        function drawGrid(withHighlight = true) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        window.toggleGrid = function() {
+            showGrid = !showGrid;
+            document.getElementById('gridBtn').innerText = showGrid ? "Ocultar Grid" : "Mostrar Grid";
+            drawGrid();
+        }
 
-            // 1. Capa Base (Suelo Var 0 por defecto o suelo especificado en grid)
-            // IMPORTANTE: Para que las imágenes con transparencia funcionen bien, primero pintamos un suelo base
+        function drawGrid(withHighlight = true) {
+            // Fondo base suave para evitar flicker en zonas vacías
+            ctx.fillStyle = "#334155"; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Capa Base (Suelo)
             for (let y = 0; y < 6; y++) {
                 for (let x = 0; x < 6; x++) {
                     const posX = x * CELL_SIZE;
                     const posY = y * CELL_SIZE;
-                    
-                    // Si la celda es suelo, usamos su variación específica.
-                    // Si la celda es un objeto (muro), pintamos suelo debajo (usamos varIndex 0 del suelo por defecto como base)
                     const baseImg = images['floor'][0]; 
-                    
                     if (baseImg) {
                         ctx.drawImage(baseImg, posX, posY, CELL_SIZE, CELL_SIZE);
                     } else {
-                        const typeObj = terrainTypes.find(t => t.id === 'floor');
-                        ctx.fillStyle = typeObj.color;
+                        ctx.fillStyle = terrainTypes.find(t => t.id === 'floor').color;
                         ctx.fillRect(posX, posY, CELL_SIZE, CELL_SIZE);
                     }
                 }
             }
 
-            // 2. Capa de Objetos / Variaciones
+            // 2. Capa Objetos
             for (let y = 0; y < 6; y++) {
                 for (let x = 0; x < 6; x++) {
                     const cell = grid[y][x];
-                    const type = cell.type;
-                    const rotation = cell.rotation;
-                    const varIndex = cell.varIndex;
-                    
                     const posX = x * CELL_SIZE;
                     const posY = y * CELL_SIZE;
                     const centerX = posX + CELL_SIZE / 2;
@@ -320,37 +272,29 @@
 
                     ctx.save();
                     ctx.translate(centerX, centerY);
-                    ctx.rotate(rotation * Math.PI / 180);
+                    ctx.rotate(cell.rotation * Math.PI / 180);
                     const drawX = -CELL_SIZE / 2;
                     const drawY = -CELL_SIZE / 2;
 
-                    const img = images[type][varIndex];
-
+                    const img = images[cell.type][cell.varIndex];
                     if (img) {
-                        // Si es suelo y ya lo pintamos en la base (y es var 0 y rot 0), podríamos saltarlo,
-                        // pero mejor repintar para asegurar la variación correcta si no es la 0.
                         ctx.drawImage(img, drawX, drawY, CELL_SIZE, CELL_SIZE);
-                    } else {
-                        // Fallback visual si no hay imagen
-                        const typeObj = terrainTypes.find(t => t.id === type);
+                    } else if (cell.type !== 'floor') {
+                        // Placeholder minimalista
+                        const typeObj = terrainTypes.find(t => t.id === cell.type);
                         ctx.fillStyle = typeObj.color;
-                        ctx.fillRect(drawX, drawY, CELL_SIZE, CELL_SIZE);
-                        ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                        ctx.lineWidth = 4;
-                        ctx.strokeRect(drawX, drawY, CELL_SIZE, CELL_SIZE);
-                        
-                        // Texto identificador
-                        ctx.fillStyle = "rgba(255,255,255,0.8)";
-                        ctx.font = "bold 60px Arial";
+                        ctx.fillRect(drawX+10, drawY+10, CELL_SIZE-20, CELL_SIZE-20);
+                        ctx.fillStyle = "rgba(255,255,255,0.9)";
+                        ctx.font = "bold 80px Arial";
                         ctx.textAlign = "center";
-                        // Nombre + Variación
-                        ctx.fillText(`${type.toUpperCase().substring(0, 3)} ${varIndex + 1}`, 0, 20);
+                        ctx.textBaseline = "middle";
+                        ctx.fillText(typeObj.name.substring(0,2).toUpperCase(), 0, 0);
                         
-                        // Indicador de rotación
-                        if (rotation !== 0 || type === 'wall' || type === 'exit') {
-                            ctx.fillStyle = "rgba(255,255,255,0.5)";
+                        // Indicador rotación discreto
+                        if (cell.rotation !== 0) {
+                            ctx.fillStyle = "#fbbf24";
                             ctx.beginPath();
-                            ctx.arc(0, -CELL_SIZE/3, 10, 0, Math.PI*2);
+                            ctx.arc(CELL_SIZE/2 - 30, -CELL_SIZE/2 + 30, 15, 0, Math.PI*2);
                             ctx.fill();
                         }
                     }
@@ -363,75 +307,70 @@
                 const hX = hoverX * CELL_SIZE;
                 const hY = hoverY * CELL_SIZE;
                 ctx.save();
-                ctx.strokeStyle = "#a78bfa";
-                ctx.lineWidth = 12;
-                ctx.strokeRect(hX, hY, CELL_SIZE, CELL_SIZE);
-                ctx.fillStyle = "rgba(139, 92, 246, 0.25)";
+                ctx.strokeStyle = "rgba(167, 139, 250, 0.8)";
+                ctx.lineWidth = 4;
+                ctx.strokeRect(hX+2, hY+2, CELL_SIZE-4, CELL_SIZE-4);
+                ctx.fillStyle = "rgba(139, 92, 246, 0.1)";
                 ctx.fillRect(hX, hY, CELL_SIZE, CELL_SIZE);
                 ctx.restore();
             }
 
-            // 4. Rejilla (Blanca y Visible)
-            ctx.strokeStyle = "rgba(255,255,255,0.5)";
-            ctx.lineWidth = 10;
-            for (let i = 1; i < 6; i++) {
-                ctx.beginPath();
-                ctx.moveTo(i * CELL_SIZE, 0);
-                ctx.lineTo(i * CELL_SIZE, canvas.height);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(0, i * CELL_SIZE);
-                ctx.lineTo(canvas.width, i * CELL_SIZE);
-                ctx.stroke();
+            // 4. Rejilla Sutil (Opcional)
+            if (showGrid) {
+                ctx.strokeStyle = "rgba(0,0,0,0.15)"; // Mucho más sutil, sombra negra ligera
+                ctx.lineWidth = 2; // Línea fina
+                for (let i = 1; i < 6; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(i * CELL_SIZE, 0);
+                    ctx.lineTo(i * CELL_SIZE, canvas.height);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(0, i * CELL_SIZE);
+                    ctx.lineTo(canvas.width, i * CELL_SIZE);
+                    ctx.stroke();
+                }
             }
-            
-            // Actualizar miniaturas del sidebar (feedback visual de imagen cargada)
-            updatePreviews();
         }
 
         function updatePreviews() {
             terrainTypes.forEach(type => {
-                for (let i = 0; i < 3; i++) {
+                for (let i = 0; i < VARIATION_COUNT; i++) {
                     const img = images[type.id][i];
                     const previewDiv = document.getElementById(`preview-${type.id}-${i}`);
-                    if (previewDiv && img) {
-                        // Si hay imagen y no la estamos mostrando ya
-                        if (!previewDiv.querySelector('img')) {
-                            previewDiv.innerHTML = ``; // Limpiar número
-                            const thumb = document.createElement('img');
-                            thumb.src = img.src;
-                            thumb.className = "w-full h-full object-cover";
-                            previewDiv.appendChild(thumb);
-                        }
+                    if (previewDiv && img && !previewDiv.querySelector('img')) {
+                        previewDiv.innerHTML = '';
+                        const thumb = document.createElement('img');
+                        thumb.src = img.src;
+                        thumb.className = "w-full h-full object-cover";
+                        previewDiv.appendChild(thumb);
                     }
                 }
             });
         }
 
         window.resetGrid = function() {
-            if(confirm('¿Borrar todo el diseño actual?')) {
+            if(confirm('¿Borrar todo el diseño?')) {
                 grid = Array(6).fill().map(() => Array(6).fill(null).map(() => ({ type: 'floor', rotation: 0, varIndex: 0 })));
                 drawGrid();
             }
         }
 
         window.downloadTile = function() {
-            const prevHoverX = hoverX;
-            hoverX = -1;
+            const prevHoverX = hoverX; hoverX = -1;
+            const prevShowGrid = showGrid; showGrid = false; // Exportar SIN grid por defecto para impresión limpia
             drawGrid();
             
             const link = document.createElement('a');
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            link.download = `pocket-entropy-tile-${timestamp}.png`;
+            link.download = `pocket-entropy-map-${Date.now()}.png`;
             link.href = canvas.toDataURL('image/png', 1.0);
             link.click();
             
             hoverX = prevHoverX;
+            showGrid = prevShowGrid;
             drawGrid();
         }
 
         init();
-
     </script>
 </body>
 </html>
