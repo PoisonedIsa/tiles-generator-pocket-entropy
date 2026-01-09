@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pocket Entropy - Tile Architect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0;
+        }
+        
+        h1, h2, h3 {
+            font-family: 'Cinzel', serif;
+        }
+
+        canvas {
+            image-rendering: pixelated; 
+            cursor: pointer; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            aspect-ratio: 1 / 1;
+        }
+
+        /* Estilo para el slot seleccionado */
+        .var-slot.active {
+            border-color: #a78bfa; /* Violet 400 */
+            box-shadow: 0 0 8px #8b5cf6;
+            transform: scale(1.05);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-slate-900 border-b border-slate-700 p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-violet-400">POCKET ENTROPY <span class="text-slate-400 text-sm font-sans ml-2">Tile Architect v2.0 (Variaciones)</span></h1>
+            <div class="flex gap-2">
+                <button onclick="resetGrid()" class="px-4 py-2 bg-red-900 hover:bg-red-700 text-white rounded text-sm transition">Borrar Grid</button>
+                <button onclick="downloadTile()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded font-bold transition shadow-lg flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    Exportar PNG (HD)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex-1 container mx-auto p-6 flex flex-col lg:flex-row gap-8">
+        
+        <!-- Left Panel: Assets Palette -->
+        <div class="w-full lg:w-1/3 bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-xl overflow-y-auto max-h-[85vh]">
+            <h2 class="text-xl mb-4 text-slate-200 border-b border-slate-600 pb-2">1. Cargar Assets</h2>
+            <p class="text-xs text-slate-400 mb-4">Cada tipo tiene 3 variaciones. Haz clic en el cuadro para <strong>seleccionar</strong> y en el icono de subida para <strong>cargar imagen</strong>.</p>
+
+            <div id="palette-container" class="space-y-4">
+                <!-- Se genera dinámicamente con JS -->
+            </div>
+        </div>
+
+        <!-- Center Panel: Canvas & Drawing -->
+        <div class="w-full lg:w-2/3 flex flex-col items-center">
+            <h2 class="text-xl mb-4 text-slate-200">2. Diseñar Loseta (6x6)</h2>
+            
+            <div class="relative group w-full flex justify-center">
+                <canvas id="tileCanvas" width="2400" height="2400" class="bg-slate-950 rounded border-2 border-slate-600"></canvas>
+            </div>
+            <div class="mt-2 text-xs text-slate-500">Resolución de Salida: 2400x2400px</div>
+
+            <div class="mt-6 p-4 bg-slate-800 rounded border border-slate-700 w-full max-w-xl">
+                <h3 class="text-sm font-bold text-slate-400 mb-2">Instrucciones:</h3>
+                <ul class="text-xs text-slate-300 list-disc list-inside space-y-1">
+                    <li><strong>Seleccionar:</strong> Elige una de las 3 variaciones del menú izquierdo.</li>
+                    <li><strong>Pintar:</strong> Clic o arrastre en la cuadrícula.</li>
+                    <li><strong>Rotar:</strong> Clic sobre un elemento existente para girarlo 90°.</li>
+                    <li><strong>Variedad:</strong> Usa diferentes variaciones de suelo/muro para evitar patrones repetitivos.</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const terrainTypes = [
+            { id: 'floor', name: 'Suelo (Base)', color: '#334155' },
+            { id: 'wall', name: 'Muro (#)', color: '#020617' },
+            { id: 'obstacle', name: 'Obstáculo (X)', color: '#475569' },
+            { id: 'enemy', name: 'Pentagrama (P)', color: '#ef4444' },
+            { id: 'boss', name: 'Jefe (J)', color: '#7f1d1d' },
+            { id: 'chest', name: 'Tesoro (C)', color: '#eab308' },
+            { id: 'bonfire', name: 'Hoguera (H)', color: '#f97316' },
+            { id: 'valve', name: 'Válvula (V)', color: '#0ea5e9' },
+            { id: 'exit', name: 'Salida/Puerta', color: '#94a3b8' }
+        ];
+
+        // Estado Global
+        // activeBrush ahora guarda { id: string, varIndex: number }
+        let activeBrush = { id: 'wall', varIndex: 0 };
+        
+        // grid guarda { type: string, rotation: number, varIndex: number }
+        let grid = Array(6).fill().map(() => Array(6).fill(null).map(() => ({ type: 'floor', rotation: 0, varIndex: 0 })));
+        
+        // images ahora es un objeto donde cada key (id) tiene un array de 3 imagenes (o null)
+        let images = {}; 
+        
+        // Inicializar estructura de imágenes
+        terrainTypes.forEach(t => {
+            images[t.id] = [null, null, null];
+        });
+
+        let isDrawing = false;
+        let hoverX = -1;
+        let hoverY = -1;
+
+        const canvas = document.getElementById('tileCanvas');
+        const ctx = canvas.getContext('2d');
+        const CELL_SIZE = 400; 
+
+        function init() {
+            createPalette();
+            drawGrid();
+            
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', leaveCanvas);
+            
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                startDrawing(e.touches[0]);
+            });
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                handleMouseMove(e.touches[0]);
+            });
+        }
+
+        function createPalette() {
+            const container = document.getElementById('palette-container');
+            container.innerHTML = ''; // Limpiar por si acaso
+
+            terrainTypes.forEach(type => {
+                const row = document.createElement('div');
+                row.className = `p-3 rounded border border-slate-700 bg-slate-900 transition hover:bg-slate-800`;
+                
+                // Título de la categoría
+                const title = document.createElement('div');
+                title.className = "flex items-center gap-2 mb-2";
+                title.innerHTML = `<div class="w-3 h-3 rounded-full" style="background-color: ${type.color}"></div><span class="text-sm font-bold text-slate-300 uppercase tracking-wide">${type.name}</span>`;
+                row.appendChild(title);
+
+                // Contenedor de variaciones (3 slots)
+                const slotsContainer = document.createElement('div');
+                slotsContainer.className = "flex gap-2";
+
+                for (let i = 0; i < 3; i++) {
+                    const isActive = activeBrush.id === type.id && activeBrush.varIndex === i;
+                    
+                    const slot = document.createElement('div');
+                    slot.className = `var-slot relative flex-1 aspect-square bg-slate-950 rounded border-2 cursor-pointer transition group overflow-hidden ${isActive ? 'active border-violet-500' : 'border-slate-700 hover:border-slate-500'}`;
+                    slot.onclick = () => setBrush(type.id, i);
+
+                    // Contenido del slot (Preview)
+                    const previewId = `preview-${type.id}-${i}`;
+                    slot.innerHTML = `
+                        <div id="${previewId}" class="w-full h-full flex items-center justify-center text-slate-700 font-mono text-xs">
+                            ${i + 1}
+                        </div>
+                        
+                        <!-- Botón de subir (aparece en hover) -->
+                        <label class="absolute bottom-1 right-1 bg-slate-800 hover:bg-slate-600 text-white p-1.5 rounded shadow-lg opacity-0 group-hover:opacity-100 transition cursor-pointer z-10" title="Subir Imagen" onclick="event.stopPropagation()">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0l-4 4m4-4v12" /></svg>
+                            <input type="file" accept="image/*" onchange="uploadImage('${type.id}', ${i}, this)">
+                        </label>
+                    `;
+                    slotsContainer.appendChild(slot);
+                }
+                row.appendChild(slotsContainer);
+                container.appendChild(row);
+            });
+        }
+
+        window.setBrush = function(id, varIndex) {
+            activeBrush = { id, varIndex };
+            createPalette(); // Re-renderizar para actualizar clases 'active'
+        }
+
+        window.uploadImage = function(id, varIndex, input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // Guardar imagen en el array correspondiente
+                        images[id][varIndex] = img;
+                        
+                        // Seleccionar automáticamente esta variación
+                        setBrush(id, varIndex);
+                        
+                        // Actualizar grid para mostrar cambios
+                        drawGrid();
+                    }
+                    img.src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function getCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = Math.floor(((e.clientX - rect.left) * scaleX) / CELL_SIZE);
+            const y = Math.floor(((e.clientY - rect.top) * scaleY) / CELL_SIZE);
+            return { x, y };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            paint(e, true);
+        }
+
+        function handleMouseMove(e) {
+            const { x, y } = getCoords(e);
+            
+            if (x !== hoverX || y !== hoverY) {
+                hoverX = x;
+                hoverY = y;
+                drawGrid();
+            }
+
+            if (isDrawing) {
+                paint(e, false);
+            }
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function leaveCanvas() {
+            isDrawing = false;
+            hoverX = -1;
+            hoverY = -1;
+            drawGrid(); 
+        }
+
+        function paint(e, isClick) {
+            const { x, y } = getCoords(e);
+            
+            if (x >= 0 && x < 6 && y >= 0 && y < 6) {
+                const cell = grid[y][x];
+                
+                // Si es clic y es el mismo tipo Y misma variación -> Rotar
+                if (isClick && cell.type === activeBrush.id && cell.varIndex === activeBrush.varIndex) {
+                    cell.rotation = (cell.rotation + 90) % 360;
+                } 
+                // Si pintamos (arrastre o clic en diferente)
+                else if (cell.type !== activeBrush.id || cell.varIndex !== activeBrush.varIndex || !isClick) {
+                    // Evitar resetear rotación si solo cambiamos de celda arrastrando con el mismo pincel
+                    if (cell.type !== activeBrush.id || cell.varIndex !== activeBrush.varIndex) {
+                        grid[y][x] = { 
+                            type: activeBrush.id, 
+                            rotation: 0, 
+                            varIndex: activeBrush.varIndex 
+                        };
+                    }
+                }
+                drawGrid();
+            }
+        }
+
+        function drawGrid(withHighlight = true) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Capa Base (Suelo Var 0 por defecto o suelo especificado en grid)
+            // IMPORTANTE: Para que las imágenes con transparencia funcionen bien, primero pintamos un suelo base
+            for (let y = 0; y < 6; y++) {
+                for (let x = 0; x < 6; x++) {
+                    const posX = x * CELL_SIZE;
+                    const posY = y * CELL_SIZE;
+                    
+                    // Si la celda es suelo, usamos su variación específica.
+                    // Si la celda es un objeto (muro), pintamos suelo debajo (usamos varIndex 0 del suelo por defecto como base)
+                    const baseImg = images['floor'][0]; 
+                    
+                    if (baseImg) {
+                        ctx.drawImage(baseImg, posX, posY, CELL_SIZE, CELL_SIZE);
+                    } else {
+                        const typeObj = terrainTypes.find(t => t.id === 'floor');
+                        ctx.fillStyle = typeObj.color;
+                        ctx.fillRect(posX, posY, CELL_SIZE, CELL_SIZE);
+                    }
+                }
+            }
+
+            // 2. Capa de Objetos / Variaciones
+            for (let y = 0; y < 6; y++) {
+                for (let x = 0; x < 6; x++) {
+                    const cell = grid[y][x];
+                    const type = cell.type;
+                    const rotation = cell.rotation;
+                    const varIndex = cell.varIndex;
+                    
+                    const posX = x * CELL_SIZE;
+                    const posY = y * CELL_SIZE;
+                    const centerX = posX + CELL_SIZE / 2;
+                    const centerY = posY + CELL_SIZE / 2;
+
+                    ctx.save();
+                    ctx.translate(centerX, centerY);
+                    ctx.rotate(rotation * Math.PI / 180);
+                    const drawX = -CELL_SIZE / 2;
+                    const drawY = -CELL_SIZE / 2;
+
+                    const img = images[type][varIndex];
+
+                    if (img) {
+                        // Si es suelo y ya lo pintamos en la base (y es var 0 y rot 0), podríamos saltarlo,
+                        // pero mejor repintar para asegurar la variación correcta si no es la 0.
+                        ctx.drawImage(img, drawX, drawY, CELL_SIZE, CELL_SIZE);
+                    } else {
+                        // Fallback visual si no hay imagen
+                        const typeObj = terrainTypes.find(t => t.id === type);
+                        ctx.fillStyle = typeObj.color;
+                        ctx.fillRect(drawX, drawY, CELL_SIZE, CELL_SIZE);
+                        ctx.strokeStyle = "rgba(0,0,0,0.2)";
+                        ctx.lineWidth = 4;
+                        ctx.strokeRect(drawX, drawY, CELL_SIZE, CELL_SIZE);
+                        
+                        // Texto identificador
+                        ctx.fillStyle = "rgba(255,255,255,0.8)";
+                        ctx.font = "bold 60px Arial";
+                        ctx.textAlign = "center";
+                        // Nombre + Variación
+                        ctx.fillText(`${type.toUpperCase().substring(0, 3)} ${varIndex + 1}`, 0, 20);
+                        
+                        // Indicador de rotación
+                        if (rotation !== 0 || type === 'wall' || type === 'exit') {
+                            ctx.fillStyle = "rgba(255,255,255,0.5)";
+                            ctx.beginPath();
+                            ctx.arc(0, -CELL_SIZE/3, 10, 0, Math.PI*2);
+                            ctx.fill();
+                        }
+                    }
+                    ctx.restore();
+                }
+            }
+
+            // 3. Highlight
+            if (withHighlight && hoverX >= 0 && hoverX < 6 && hoverY >= 0 && hoverY < 6) {
+                const hX = hoverX * CELL_SIZE;
+                const hY = hoverY * CELL_SIZE;
+                ctx.save();
+                ctx.strokeStyle = "#a78bfa";
+                ctx.lineWidth = 12;
+                ctx.strokeRect(hX, hY, CELL_SIZE, CELL_SIZE);
+                ctx.fillStyle = "rgba(139, 92, 246, 0.25)";
+                ctx.fillRect(hX, hY, CELL_SIZE, CELL_SIZE);
+                ctx.restore();
+            }
+
+            // 4. Rejilla (Blanca y Visible)
+            ctx.strokeStyle = "rgba(255,255,255,0.5)";
+            ctx.lineWidth = 10;
+            for (let i = 1; i < 6; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * CELL_SIZE, 0);
+                ctx.lineTo(i * CELL_SIZE, canvas.height);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i * CELL_SIZE);
+                ctx.lineTo(canvas.width, i * CELL_SIZE);
+                ctx.stroke();
+            }
+            
+            // Actualizar miniaturas del sidebar (feedback visual de imagen cargada)
+            updatePreviews();
+        }
+
+        function updatePreviews() {
+            terrainTypes.forEach(type => {
+                for (let i = 0; i < 3; i++) {
+                    const img = images[type.id][i];
+                    const previewDiv = document.getElementById(`preview-${type.id}-${i}`);
+                    if (previewDiv && img) {
+                        // Si hay imagen y no la estamos mostrando ya
+                        if (!previewDiv.querySelector('img')) {
+                            previewDiv.innerHTML = ``; // Limpiar número
+                            const thumb = document.createElement('img');
+                            thumb.src = img.src;
+                            thumb.className = "w-full h-full object-cover";
+                            previewDiv.appendChild(thumb);
+                        }
+                    }
+                }
+            });
+        }
+
+        window.resetGrid = function() {
+            if(confirm('¿Borrar todo el diseño actual?')) {
+                grid = Array(6).fill().map(() => Array(6).fill(null).map(() => ({ type: 'floor', rotation: 0, varIndex: 0 })));
+                drawGrid();
+            }
+        }
+
+        window.downloadTile = function() {
+            const prevHoverX = hoverX;
+            hoverX = -1;
+            drawGrid();
+            
+            const link = document.createElement('a');
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            link.download = `pocket-entropy-tile-${timestamp}.png`;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+            
+            hoverX = prevHoverX;
+            drawGrid();
+        }
+
+        init();
+
+    </script>
+</body>
+</html>
