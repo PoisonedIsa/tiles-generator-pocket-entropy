@@ -10,7 +10,7 @@
         
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #334155; /* Slate 700 - Más suave que negro puro */
+            background-color: #334155; 
             color: #f1f5f9;
         }
         
@@ -20,7 +20,7 @@
 
         canvas {
             image-rendering: pixelated; 
-            cursor: pointer; 
+            cursor: crosshair; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             width: 100%;
             max-width: 600px;
@@ -33,6 +33,7 @@
             box-shadow: 0 0 8px #8b5cf6;
             transform: scale(1.05);
             z-index: 10;
+            background-color: rgba(139, 92, 246, 0.1);
         }
 
         input[type="file"] { display: none; }
@@ -43,7 +44,7 @@
     <!-- Header -->
     <header class="bg-slate-800 border-b border-slate-600 p-4 shadow-lg sticky top-0 z-50">
         <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <h1 class="text-2xl font-bold text-violet-300 tracking-wider">POCKET ENTROPY <span class="text-slate-400 text-sm font-sans ml-2 font-normal">Architect v2.5</span></h1>
+            <h1 class="text-2xl font-bold text-violet-300 tracking-wider">POCKET ENTROPY <span class="text-slate-400 text-sm font-sans ml-2 font-normal">Architect v2.6</span></h1>
             <div class="flex gap-2">
                 <button onclick="toggleGrid()" id="gridBtn" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-sm transition border border-slate-500">Ocultar Grid</button>
                 <button onclick="resetGrid()" class="px-4 py-2 bg-red-900/80 hover:bg-red-800 text-white rounded text-sm transition border border-red-700">Borrar</button>
@@ -59,10 +60,10 @@
     <div class="flex-1 container mx-auto p-6 flex flex-col lg:flex-row gap-8 items-start">
         
         <!-- Left Panel: Assets Palette -->
-        <div class="w-full lg:w-1/3 bg-slate-800/90 p-5 rounded-xl border border-slate-600 shadow-xl overflow-y-auto max-h-[85vh] sticky top-24">
+        <div class="w-full lg:w-1/3 bg-slate-800/90 p-5 rounded-xl border border-slate-600 shadow-xl overflow-y-auto max-h-[85vh] sticky top-24 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
             <h2 class="text-lg mb-4 text-slate-200 border-b border-slate-600 pb-2 font-bold flex justify-between items-center">
                 <span>1. Banco de Assets</span>
-                <span class="text-xs font-normal text-slate-400 bg-slate-900 px-2 py-1 rounded">5 Variaciones/tipo</span>
+                <span class="text-xs font-normal text-slate-400 bg-slate-900 px-2 py-1 rounded">Clic para usar / Icono para subir</span>
             </h2>
             <div id="palette-container" class="space-y-5">
                 <!-- Se genera dinámicamente con JS -->
@@ -73,7 +74,10 @@
         <div class="w-full lg:w-2/3 flex flex-col items-center">
             <div class="flex justify-between w-full max-w-xl mb-2 items-end">
                 <h2 class="text-xl text-slate-100 font-bold">2. Área de Diseño</h2>
-                <span class="text-xs text-slate-400">Clic: Pintar/Rotar • Grid: 6x6</span>
+                <div class="text-right">
+                    <div id="activeToolDisplay" class="text-sm font-bold text-violet-400">Herramienta: Muro (Var 1)</div>
+                    <span class="text-xs text-slate-400">Clic: Pintar/Rotar • Grid: 6x6</span>
+                </div>
             </div>
             
             <div class="relative group w-full flex justify-center bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 shadow-2xl backdrop-blur-sm">
@@ -84,15 +88,15 @@
                 <div class="p-4 bg-slate-800/80 rounded border border-slate-600">
                     <h3 class="text-xs font-bold text-violet-300 uppercase mb-2">Controles</h3>
                     <ul class="text-xs text-slate-300 space-y-1">
-                        <li>• <strong>Clic:</strong> Colocar asset seleccionado.</li>
-                        <li>• <strong>Clic (Repetido):</strong> Rotar 90°.</li>
-                        <li>• <strong>Arrastrar:</strong> Pintar múltiples celdas.</li>
+                        <li>• <strong>Clic Izq:</strong> Colocar asset seleccionado.</li>
+                        <li>• <strong>Clic (Repetido):</strong> Rotar asset existente.</li>
+                        <li>• <strong>Arrastrar:</strong> Pintar rápido.</li>
                     </ul>
                 </div>
                 <div class="p-4 bg-slate-800/80 rounded border border-slate-600">
-                     <h3 class="text-xs font-bold text-emerald-300 uppercase mb-2">Tips Visuales</h3>
+                     <h3 class="text-xs font-bold text-emerald-300 uppercase mb-2">Ayuda</h3>
                      <p class="text-xs text-slate-300">
-                         Si el patrón marea, prueba a desactivar la rejilla o usar texturas más planas (Var 0) intercaladas con detalles (Var 1).
+                         Ahora puedes seleccionar un slot vacío para usar el color placeholder. Usa el icono de "subir" (esquina inferior derecha del slot) solo cuando tengas la imagen lista.
                      </p>
                 </div>
             </div>
@@ -104,6 +108,7 @@
         const terrainTypes = [
             { id: 'floor', name: 'Suelo (Base)', color: '#475569' },
             { id: 'wall', name: 'Muro (Borde)', color: '#1e293b' },
+            { id: 'corner', name: 'Esquinas', color: '#8b5cf6' }, // NUEVO: Categoría Esquinas
             { id: 'obstacle', name: 'Obstáculo', color: '#64748b' },
             { id: 'enemy', name: 'Enemigo', color: '#ef4444' },
             { id: 'boss', name: 'Jefe', color: '#991b1b' },
@@ -118,6 +123,7 @@
         let images = {}; 
         let showGrid = true;
         
+        // Inicializar banco de imágenes
         terrainTypes.forEach(t => { images[t.id] = new Array(VARIATION_COUNT).fill(null); });
 
         let isDrawing = false;
@@ -131,6 +137,7 @@
         function init() {
             createPalette();
             drawGrid();
+            updateActiveToolDisplay();
             
             canvas.addEventListener('mousedown', startDrawing);
             canvas.addEventListener('mousemove', handleMouseMove);
@@ -159,17 +166,26 @@
 
                 for (let i = 0; i < VARIATION_COUNT; i++) {
                     const isActive = activeBrush.id === type.id && activeBrush.varIndex === i;
+                    
+                    // Slot Container
                     const slot = document.createElement('div');
-                    slot.className = `relative aspect-square bg-slate-950 rounded border cursor-pointer transition-all group overflow-hidden ${isActive ? 'active border-violet-500 z-10 ring-1 ring-violet-500' : 'border-slate-700 hover:border-slate-500 opacity-80 hover:opacity-100'}`;
+                    // Clases: 'group' para hover effects en el botón de upload
+                    slot.className = `var-slot relative aspect-square bg-slate-950 rounded border cursor-pointer transition-all group overflow-hidden ${isActive ? 'active border-violet-500 ring-1 ring-violet-500 z-10' : 'border-slate-700 hover:border-slate-500 opacity-90 hover:opacity-100'}`;
+                    
+                    // ACCIÓN 1: Seleccionar pincel (Clic en el slot general)
                     slot.onclick = () => setBrush(type.id, i);
 
                     const previewId = `preview-${type.id}-${i}`;
+                    
                     slot.innerHTML = `
-                        <div id="${previewId}" class="w-full h-full flex items-center justify-center text-slate-600 font-mono text-[10px] font-bold">
-                            ${i + 1}
+                        <!-- Preview Area (Imagen o Número) -->
+                        <div id="${previewId}" class="w-full h-full flex items-center justify-center pointer-events-none">
+                            <span class="text-slate-600 font-mono text-[10px] font-bold">${i + 1}</span>
                         </div>
-                        <label class="absolute inset-0 bg-slate-900/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer z-20 backdrop-blur-[1px]" title="Subir Imagen" onclick="event.stopPropagation()">
-                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                        
+                        <!-- ACCIÓN 2: Botón de Subir (Esquina inferior derecha, pequeño) -->
+                        <label class="absolute bottom-0.5 right-0.5 w-6 h-6 bg-slate-900/90 hover:bg-violet-600 text-slate-400 hover:text-white rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer z-20 shadow-sm border border-slate-700" title="Subir Imagen" onclick="event.stopPropagation()">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0l-4 4m4-4v12" /></svg>
                              <input type="file" accept="image/*" onchange="uploadImage('${type.id}', ${i}, this)" class="hidden">
                         </label>
                     `;
@@ -183,7 +199,17 @@
 
         window.setBrush = function(id, varIndex) {
             activeBrush = { id, varIndex };
-            createPalette();
+            createPalette(); // Re-render para actualizar borde activo
+            updateActiveToolDisplay();
+        }
+
+        function updateActiveToolDisplay() {
+            const typeObj = terrainTypes.find(t => t.id === activeBrush.id);
+            const display = document.getElementById('activeToolDisplay');
+            if(display && typeObj) {
+                display.innerText = `Herramienta: ${typeObj.name} (Var ${activeBrush.varIndex + 1})`;
+                display.style.color = typeObj.color;
+            }
         }
 
         window.uploadImage = function(id, varIndex, input) {
@@ -193,13 +219,17 @@
                     const img = new Image();
                     img.onload = function() {
                         images[id][varIndex] = img;
+                        // Al subir, seleccionamos automáticamente esa variación
                         setBrush(id, varIndex);
                         drawGrid();
+                        updatePreviews(); // Actualizar miniatura
                     }
                     img.src = e.target.result;
                 }
                 reader.readAsDataURL(input.files[0]);
             }
+            // Reset input para permitir subir la misma imagen si se borra y se quiere poner de nuevo (opcional)
+            input.value = '';
         }
 
         function getCoords(e) {
@@ -224,9 +254,15 @@
             const { x, y } = getCoords(e);
             if (x >= 0 && x < 6 && y >= 0 && y < 6) {
                 const cell = grid[y][x];
+                
+                // Lógica de Pintado vs Rotación
+                // Si hacemos CLIC en una celda que YA tiene el mismo tipo y variación -> ROTAMOS
                 if (isClick && cell.type === activeBrush.id && cell.varIndex === activeBrush.varIndex) {
                     cell.rotation = (cell.rotation + 90) % 360;
-                } else if (cell.type !== activeBrush.id || cell.varIndex !== activeBrush.varIndex || !isClick) {
+                } 
+                // Si pintamos (arrastrando o clic en diferente) -> CAMBIAMOS TIPO
+                else if (cell.type !== activeBrush.id || cell.varIndex !== activeBrush.varIndex || !isClick) {
+                    // Solo actualizamos si es diferente para evitar resetear rotación al arrastrar sobre la misma celda
                     if (cell.type !== activeBrush.id || cell.varIndex !== activeBrush.varIndex) {
                         grid[y][x] = { type: activeBrush.id, rotation: 0, varIndex: activeBrush.varIndex };
                     }
@@ -242,7 +278,7 @@
         }
 
         function drawGrid(withHighlight = true) {
-            // Fondo base suave para evitar flicker en zonas vacías
+            // Fondo
             ctx.fillStyle = "#334155"; 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -251,6 +287,8 @@
                 for (let x = 0; x < 6; x++) {
                     const posX = x * CELL_SIZE;
                     const posY = y * CELL_SIZE;
+                    
+                    // Siempre dibujamos suelo base debajo de todo para evitar huecos en transparencias
                     const baseImg = images['floor'][0]; 
                     if (baseImg) {
                         ctx.drawImage(baseImg, posX, posY, CELL_SIZE, CELL_SIZE);
@@ -261,10 +299,16 @@
                 }
             }
 
-            // 2. Capa Objetos
+            // 2. Capa Objetos (Encima del suelo base)
             for (let y = 0; y < 6; y++) {
                 for (let x = 0; x < 6; x++) {
                     const cell = grid[y][x];
+                    
+                    // Si la celda es 'floor' y varIndex es 0, ya la dibujamos en el paso 1, pero 
+                    // si tiene rotación o es otra variación, la dibujamos encima.
+                    // Optimización: Si es floor var 0 rot 0, saltar (ya está pintado).
+                    if (cell.type === 'floor' && cell.varIndex === 0 && cell.rotation === 0) continue;
+
                     const posX = x * CELL_SIZE;
                     const posY = y * CELL_SIZE;
                     const centerX = posX + CELL_SIZE / 2;
@@ -279,18 +323,27 @@
                     const img = images[cell.type][cell.varIndex];
                     if (img) {
                         ctx.drawImage(img, drawX, drawY, CELL_SIZE, CELL_SIZE);
-                    } else if (cell.type !== 'floor') {
-                        // Placeholder minimalista
+                    } else {
+                        // Placeholder visual
                         const typeObj = terrainTypes.find(t => t.id === cell.type);
-                        ctx.fillStyle = typeObj.color;
-                        ctx.fillRect(drawX+10, drawY+10, CELL_SIZE-20, CELL_SIZE-20);
+                        
+                        // Si es suelo (no imagen), llenar todo. Si es objeto, un cuadrado más pequeño
+                        if (cell.type === 'floor') {
+                             ctx.fillStyle = typeObj.color;
+                             ctx.fillRect(drawX, drawY, CELL_SIZE, CELL_SIZE);
+                        } else {
+                             ctx.fillStyle = typeObj.color;
+                             ctx.fillRect(drawX+20, drawY+20, CELL_SIZE-40, CELL_SIZE-40);
+                        }
+
+                        // Texto identificativo
                         ctx.fillStyle = "rgba(255,255,255,0.9)";
-                        ctx.font = "bold 80px Arial";
+                        ctx.font = "bold 60px Arial";
                         ctx.textAlign = "center";
                         ctx.textBaseline = "middle";
-                        ctx.fillText(typeObj.name.substring(0,2).toUpperCase(), 0, 0);
+                        ctx.fillText(`${typeObj.name.substring(0,2).toUpperCase()}${cell.varIndex+1}`, 0, 0);
                         
-                        // Indicador rotación discreto
+                        // Indicador de rotación (punto amarillo)
                         if (cell.rotation !== 0) {
                             ctx.fillStyle = "#fbbf24";
                             ctx.beginPath();
@@ -302,23 +355,23 @@
                 }
             }
 
-            // 3. Highlight
+            // 3. Highlight del cursor
             if (withHighlight && hoverX >= 0 && hoverX < 6 && hoverY >= 0 && hoverY < 6) {
                 const hX = hoverX * CELL_SIZE;
                 const hY = hoverY * CELL_SIZE;
                 ctx.save();
-                ctx.strokeStyle = "rgba(167, 139, 250, 0.8)";
-                ctx.lineWidth = 4;
-                ctx.strokeRect(hX+2, hY+2, CELL_SIZE-4, CELL_SIZE-4);
-                ctx.fillStyle = "rgba(139, 92, 246, 0.1)";
+                ctx.strokeStyle = "rgba(167, 139, 250, 0.9)";
+                ctx.lineWidth = 6;
+                ctx.strokeRect(hX+3, hY+3, CELL_SIZE-6, CELL_SIZE-6);
+                ctx.fillStyle = "rgba(139, 92, 246, 0.15)";
                 ctx.fillRect(hX, hY, CELL_SIZE, CELL_SIZE);
                 ctx.restore();
             }
 
-            // 4. Rejilla Sutil (Opcional)
+            // 4. Rejilla
             if (showGrid) {
-                ctx.strokeStyle = "rgba(0,0,0,0.15)"; // Mucho más sutil, sombra negra ligera
-                ctx.lineWidth = 2; // Línea fina
+                ctx.strokeStyle = "rgba(0,0,0,0.2)";
+                ctx.lineWidth = 2; 
                 for (let i = 1; i < 6; i++) {
                     ctx.beginPath();
                     ctx.moveTo(i * CELL_SIZE, 0);
@@ -337,11 +390,12 @@
                 for (let i = 0; i < VARIATION_COUNT; i++) {
                     const img = images[type.id][i];
                     const previewDiv = document.getElementById(`preview-${type.id}-${i}`);
-                    if (previewDiv && img && !previewDiv.querySelector('img')) {
-                        previewDiv.innerHTML = '';
+                    // Si tenemos div y tenemos imagen, renderizar miniatura
+                    if (previewDiv && img) {
+                        previewDiv.innerHTML = ''; // Quitar número
                         const thumb = document.createElement('img');
                         thumb.src = img.src;
-                        thumb.className = "w-full h-full object-cover";
+                        thumb.className = "w-full h-full object-cover rounded-sm";
                         previewDiv.appendChild(thumb);
                     }
                 }
@@ -357,7 +411,7 @@
 
         window.downloadTile = function() {
             const prevHoverX = hoverX; hoverX = -1;
-            const prevShowGrid = showGrid; showGrid = false; // Exportar SIN grid por defecto para impresión limpia
+            const prevShowGrid = showGrid; showGrid = false; // Exportar limpio
             drawGrid();
             
             const link = document.createElement('a');
